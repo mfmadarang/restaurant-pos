@@ -52,16 +52,16 @@ public class PointOfSale {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome, Manager!");
         System.out.println("Select option: ");
-        System.out.println("(1) Add Item");
-        System.out.println("(2) Modify Item");
-        System.out.println("(3) Remove Item");
+        System.out.println("(1) Add Items.Item");
+        System.out.println("(2) Modify Items.Item");
+        System.out.println("(3) Remove Items.Item");
         System.out.print("Input choice: ");
         String choice = scanner.nextLine();
 
         // Manager manager = new Manager();
         switch (choice) {
             case "1":
-                System.out.println("Select Item Type: ");
+                System.out.println("Select Items.Item Type: ");
                 System.out.println("(1) Drinks");
                 System.out.println("(2) Food");
                 System.out.println("(3) Tea");
