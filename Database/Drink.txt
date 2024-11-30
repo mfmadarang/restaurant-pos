@@ -7,3 +7,6 @@ Medium:50.0,Large:100.0
 SS-SPRI-002,Sprite,Drink,Drink
 Large:50.0
 
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+
