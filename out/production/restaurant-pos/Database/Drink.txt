@@ -1,0 +1,6 @@
+Item Code,Name,Type,Category
+Size:Price,Size:Price,Size:Price
+
+
+Item Code,Name,Type,Category
+Size:Price,Size:Price,Size:Price
