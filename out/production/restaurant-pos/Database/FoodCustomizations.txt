@@ -1,1 +1,1 @@
-Rice_Garlic Rice:20,Yang Chow Rice:30
+Rice_Yang Chow Rice:30.0,Garlic Rice:20.0

@@ -1,5 +1,15 @@
-ES-AMER-001,Americano,Drink,Espresso Drinks
-Small:50,Medium:100,Large:150
+ES-AMER-001,Ameri\,cano,Drink,Drink
+Small:50.0,Medium:100.0,Large:150.0
 
-SS-COCA-001,Coca-Cola,Drink,Soft Drinks
-Medium:50,Large:100
+SS-COCA-001,Coca-Cola,Drink,Drink
+Medium:50.0,Large:100.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+

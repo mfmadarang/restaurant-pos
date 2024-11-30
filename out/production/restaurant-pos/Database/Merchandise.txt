@@ -1,4 +1,3 @@
-BS-HELL-001,Hell Week Coffee Canvas Tote,Merchandise,Bags
-Small:50,Medium:100,Large:150
-
+BS-HELL-001,Hell Week Coffee Canvas Tote,Merchandise,Merchandise
+Small:50.0,Medium:100.0,Large:150.0
 
