@@ -1,1 +1,3 @@
-DrinkCategory,IndexNumber
+Espresso Drinks,1
+Soft Drinks,1
+

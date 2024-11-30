@@ -3,17 +3,30 @@ package Menu;
 import Items.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class PointOfSale {
     private Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         PointOfSale pos = new PointOfSale();
-        pos.showMainMenu();
+        pos.fetchDataFromTextFile();
+
+        for(ItemCharacteristics item: pos.Items) {
+            System.out.println(item.getItemCode());
+            System.out.println(item.getName());
+            System.out.println(item.getCategory());
+            item.displaySizesAndPrices();
+            System.out.println();
+        }
+        Map<String, Float> sizesAndPricesMap = new HashMap<>();
+        sizesAndPricesMap.put("Large", 50F);
+        pos.Items.add(new Drink("SS-SPRI-002", "Sprite", "Drink", sizesAndPricesMap, "Soft Drinks"));
+
+        pos.storeDataToTextFile();
+
+        //pos.showMainMenu();
+
     }
 
     ArrayList<ItemCharacteristics> Items = new ArrayList<>();
@@ -66,6 +79,11 @@ public class PointOfSale {
         String line = reader.readLine();
 
         while (line != null) {
+            if (line.trim().isEmpty()) {
+                line = reader.readLine();
+                continue;
+            }
+
             String[] data = line.split(",");
             String itemCode = data[0];
             String name = data[1];
@@ -95,7 +113,12 @@ public class PointOfSale {
     private Map<String, Integer> scanCategoryIndexFromFile(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         Map<String, Integer> CategoryIndex = new HashMap<>();
+
         while (line != null) {
+            if (line.trim().isEmpty()) {
+                line = reader.readLine();
+                continue;
+            }
             String[] data = line.split(",");
             String category = data[0];
             Integer index = Integer.parseInt(data[1]);
@@ -112,7 +135,13 @@ public class PointOfSale {
         Map<String, Map<String, Float>> customizations = new HashMap<>();
 
         while (line != null) {
-            String[] data = line.split("-");
+
+            if (line.trim().isEmpty()) {
+                line = reader.readLine();
+                continue;
+            }
+
+            String[] data = line.split("_");
             String customization = data[0];
             String[] optionsAndPricesList = data[1].split(",");
 
@@ -153,24 +182,31 @@ public class PointOfSale {
             writer3.close();
 
             // writing category index to respective text file
-            BufferedWriter writer4 = new BufferedWriter(new FileWriter("Database/DrinkCategoryIndex.txt"));
-            writeCategoryIndexToTextFile(writer4, drinksCategoryIndex);
+            BufferedWriter drinkCategoryWriter = new BufferedWriter(new FileWriter("Database/DrinkCategoryIndex.txt"));
+            writeCategoryIndexToTextFile(drinkCategoryWriter, drinksCategoryIndex);
+            drinkCategoryWriter.close();
 
-            writer4 = new BufferedWriter(new FileWriter("Database/FoodCategoryIndex.txt"));
-            writeCategoryIndexToTextFile(writer4, foodCategoryIndex);
+            BufferedWriter foodCategoryWriter = new BufferedWriter(new FileWriter("Database/FoodCategoryIndex.txt"));
+            writeCategoryIndexToTextFile(foodCategoryWriter, foodCategoryIndex);
+            foodCategoryWriter.close();
 
-            writer4 = new BufferedWriter(new FileWriter("Database/MerchandiseCategoryIndex.txt"));
-            writeCategoryIndexToTextFile(writer4, merchandiseCategoryIndex);
+            BufferedWriter merchandiseCategoryWriter = new BufferedWriter(new FileWriter("Database/MerchandiseCategoryIndex.txt"));
+            writeCategoryIndexToTextFile(merchandiseCategoryWriter, merchandiseCategoryIndex);
+            merchandiseCategoryWriter.close();
+
 
             // writing each customization to respective text file
-            writer4 = new BufferedWriter(new FileWriter("Database/DrinkCustomizations.txt"));
-            writeCustomizationsToTextFile(writer4, drinkCustomizations);
+            BufferedWriter drinkCustomizationWriter = new BufferedWriter(new FileWriter("Database/DrinkCustomizations.txt"));
+            writeCustomizationsToTextFile(drinkCustomizationWriter, drinkCustomizations);
+            drinkCustomizationWriter.close();
 
-            writer4 = new BufferedWriter(new FileWriter("Database/FoodCustomizations.txt"));
-            writeCustomizationsToTextFile(writer4, foodCustomizations);
+            BufferedWriter foodCustomizationWriter = new BufferedWriter(new FileWriter("Database/FoodCustomizations.txt"));
+            writeCustomizationsToTextFile(foodCustomizationWriter, foodCustomizations);
+            foodCustomizationWriter.close();
+
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error storing data to text files: " +e.getMessage());
         }
     }
 
@@ -178,9 +214,13 @@ public class PointOfSale {
 
         writer.write(item.getItemCode() + "," + item.getName() + "," + itemType + "," + item.getCategory());
         writer.newLine();
+
+        StringJoiner joiner = new StringJoiner(",");
         for (Map.Entry<String, Float> entry : item.getSizesAndPrices().entrySet()) {
-            writer.write(entry.getKey() + ":" + entry.getValue() + ",");
+            joiner.add(entry.getKey() + ":" + entry.getValue());
         }
+        writer.write(joiner.toString());
+        writer.newLine();
         writer.newLine();
     }
 
@@ -193,12 +233,15 @@ public class PointOfSale {
 
     private void writeCustomizationsToTextFile(BufferedWriter writer, Map<String, Map<String, Float>> customizations) throws IOException {
         for(Map.Entry<String, Map<String, Float>> entry : customizations.entrySet()) {
-            writer.write(entry.getKey() + "-");
+            writer.write(entry.getKey() + "_");
             Map<String, Float> optionAndPricesMap = entry.getValue();
 
+            StringJoiner joiner = new StringJoiner(",");
             for(Map.Entry<String, Float> optionAndPricesEntry : optionAndPricesMap.entrySet()) {
-                writer.write(optionAndPricesEntry.getKey() + ":" + optionAndPricesEntry.getValue() + ",");
+                joiner.add(optionAndPricesEntry.getKey() + ":" + optionAndPricesEntry.getValue());
             }
+            writer.write(joiner.toString());
+            writer.newLine();
         }
     }
 
