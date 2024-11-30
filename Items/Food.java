@@ -3,18 +3,18 @@ package Items;
 import java.util.Map;
 
 public class Food extends ItemCharacteristics {
-    private String foodType; // e.g., Pastries, Cakes, Sandwiches, Pastas, Others
+    private String foodCategory; // e.g., Pastries, Cakes, Sandwiches, Pastas, Others
 
-    public Food(String itemCode, String itemName, String itemCategory, Map<String, Float> sizesAndPricesMap, String foodType) {
-        super(itemCode, itemName, itemCategory, sizesAndPricesMap);
-        this.foodType = foodType;
+    public Food(String itemCode, String itemName, String itemType, Map<String, Float> sizesAndPricesMap, String foodCategory) {
+        super(itemCode, itemName, itemType, sizesAndPricesMap);
+        this.foodCategory = foodCategory;
     }
 
-    public String getFoodType() {
-        return foodType;
+    public String getFoodCategory() {
+        return foodCategory;
     }
 
-    public void setFoodType(String foodType) {
-        this.foodType = foodType;
+    public void setFoodCategory(String foodCategory) {
+        this.foodCategory = foodCategory;
     }
 }

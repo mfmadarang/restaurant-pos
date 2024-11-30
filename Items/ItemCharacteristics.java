@@ -6,14 +6,14 @@ import java.util.Map;
 public abstract class ItemCharacteristics {
     private String itemCode;                     // Unique code for the item
     private String name;                         // Name of the item
-    private String category;                     // Category of the item (e.g., Food, Drink)
+    private String itemType;                     // Type of the item (e.g., Food, Drink)
     private Map<String, Float> sizesAndPrices;   // Sizes and corresponding prices
 
     // Constructor
-    public ItemCharacteristics(String itemCode, String name, String category, Map<String, Float> sizesAndPrices) {
+    public ItemCharacteristics(String itemCode, String name, String itemType, Map<String, Float> sizesAndPrices) {
         this.itemCode = itemCode;
         this.name = name;
-        this.category = category;
+        this.itemType = itemType;
         this.sizesAndPrices = sizesAndPrices != null ? sizesAndPrices : new HashMap<>();
     }
 
@@ -35,11 +35,11 @@ public abstract class ItemCharacteristics {
     }
 
     public String getCategory() {
-        return category;
+        return itemType;
     }
 
     public void setCategory(String category) {
-        this.category = category;
+        this.itemType = category;
     }
 
     public Map<String, Float> getSizesAndPrices() {

@@ -2,23 +2,249 @@ package Menu;
 
 import Items.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class PointOfSale {
     private Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         PointOfSale pos = new PointOfSale();
-        pos.showMainMenu();
+        pos.fetchDataFromTextFile();
+
+        for(ItemCharacteristics item: pos.Items) {
+            System.out.println(item.getItemCode());
+            System.out.println(item.getName());
+            System.out.println(item.getCategory());
+            item.displaySizesAndPrices();
+            System.out.println();
+        }
+        Map<String, Float> sizesAndPricesMap = new HashMap<>();
+        sizesAndPricesMap.put("Large", 50F);
+        pos.Items.add(new Drink("SS-SPRI-002", "Sprite", "Drink", sizesAndPricesMap, "Soft Drinks"));
+
+        pos.storeDataToTextFile();
+
+        //pos.showMainMenu();
+
     }
 
     ArrayList<ItemCharacteristics> Items = new ArrayList<>();
+
     Map <String, Integer> drinksCategoryIndex = new HashMap<>();
     Map <String, Integer> foodCategoryIndex = new HashMap<>();
     Map <String, Integer> merchandiseCategoryIndex = new HashMap<>();
+
+    Map <String, Map<String, Float>> drinkCustomizations = new HashMap<>();
+    Map <String, Map<String, Float>> foodCustomizations = new HashMap<>();
+
+
+    public void fetchDataFromTextFile() {
+        try {
+            // scanning items from item files and storing it into Items ArrayList
+            BufferedReader reader = new BufferedReader(new FileReader("Database/Drink.txt"));
+            scanItemsFromFile(reader);
+
+            reader = new BufferedReader(new FileReader("Database/Food.txt"));
+            scanItemsFromFile(reader);
+
+            reader = new BufferedReader(new FileReader("Database/Merchandise.txt"));
+            scanItemsFromFile(reader);
+
+            // scanning category index from respective text files and storing it into respective category index map
+            reader = new BufferedReader(new FileReader("Database/DrinkCategoryIndex.txt"));
+            drinksCategoryIndex = scanCategoryIndexFromFile(reader);
+
+            reader = new BufferedReader(new FileReader("Database/FoodCategoryIndex.txt"));
+            foodCategoryIndex = scanCategoryIndexFromFile(reader);
+
+            reader = new BufferedReader(new FileReader("Database/MerchandiseCategoryIndex.txt"));
+            merchandiseCategoryIndex = scanCategoryIndexFromFile(reader);
+
+            // scanning customizations from respective text files and storing it into customizations map
+            reader = new BufferedReader(new FileReader("Database/DrinkCustomizations.txt"));
+            drinkCustomizations = scanCustomizationsFromFile(reader);
+
+            reader = new BufferedReader(new FileReader("Database/FoodCustomizations.txt"));
+            foodCustomizations = scanCustomizationsFromFile(reader);
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void scanItemsFromFile(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+
+        while (line != null) {
+            if (line.trim().isEmpty()) {
+                line = reader.readLine();
+                continue;
+            }
+
+            String[] data = line.split(",");
+            String itemCode = data[0];
+            String name = data[1];
+            String itemType = data[2];
+            String category = data[3];
+            Map<String, Float> sizesAndPricesMap = new HashMap<>();
+
+            line = reader.readLine();
+            data = line.split(",");
+
+            for (String datum : data) {
+                String[] data2 = datum.split(":");
+                sizesAndPricesMap.put(data2[0], Float.parseFloat(data2[1]));
+            }
+
+            switch (itemType) {
+                case "Drink" -> Items.add(new Drink(itemCode, name, itemType, sizesAndPricesMap, category));
+                case "Food" -> Items.add(new Food(itemCode, name, itemType, sizesAndPricesMap, category));
+                case "Merchandise" -> Items.add(new Merchandise(itemCode, name, itemType, sizesAndPricesMap, category));
+            }
+
+            line = reader.readLine();
+
+        }
+    }
+
+    private Map<String, Integer> scanCategoryIndexFromFile(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        Map<String, Integer> CategoryIndex = new HashMap<>();
+
+        while (line != null) {
+            if (line.trim().isEmpty()) {
+                line = reader.readLine();
+                continue;
+            }
+            String[] data = line.split(",");
+            String category = data[0];
+            Integer index = Integer.parseInt(data[1]);
+            line = reader.readLine();
+
+            CategoryIndex.put(category, index);
+        }
+
+        return CategoryIndex;
+    }
+
+    private Map<String, Map<String, Float>> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        Map<String, Map<String, Float>> customizations = new HashMap<>();
+
+        while (line != null) {
+
+            if (line.trim().isEmpty()) {
+                line = reader.readLine();
+                continue;
+            }
+
+            String[] data = line.split("_");
+            String customization = data[0];
+            String[] optionsAndPricesList = data[1].split(",");
+
+            Map<String, Float> optionsAndPricesMap = new HashMap<>();
+
+            for (String optionAndPrices : optionsAndPricesList) {
+                String[] data2 = optionAndPrices.split(":");
+                optionsAndPricesMap.put(data2[0], Float.parseFloat(data2[1]));
+            }
+
+            customizations.put(customization, optionsAndPricesMap);
+            line = reader.readLine();
+        }
+        return customizations;
+    }
+
+    public void storeDataToTextFile() {
+        try {
+            //writing item details from Items ArrayList to respective text file
+            BufferedWriter writer1 = new BufferedWriter(new FileWriter("Database/Drink.txt"));
+            BufferedWriter writer2 = new BufferedWriter(new FileWriter("Database/Food.txt"));
+            BufferedWriter writer3 = new BufferedWriter(new FileWriter("Database/Merchandise.txt"));
+
+            for (ItemCharacteristics item : Items) {
+                if(item instanceof Drink) {
+                    writeItemsToTextFile(writer1, "Drink", item);
+                }
+
+                else if(item instanceof Food) {
+                    writeItemsToTextFile(writer2, "Food", item);
+                }
+                else if(item instanceof Merchandise) {
+                    writeItemsToTextFile(writer3, "Merchandise", item);
+                }
+            }
+            writer1.close();
+            writer2.close();
+            writer3.close();
+
+            // writing category index to respective text file
+            BufferedWriter drinkCategoryWriter = new BufferedWriter(new FileWriter("Database/DrinkCategoryIndex.txt"));
+            writeCategoryIndexToTextFile(drinkCategoryWriter, drinksCategoryIndex);
+            drinkCategoryWriter.close();
+
+            BufferedWriter foodCategoryWriter = new BufferedWriter(new FileWriter("Database/FoodCategoryIndex.txt"));
+            writeCategoryIndexToTextFile(foodCategoryWriter, foodCategoryIndex);
+            foodCategoryWriter.close();
+
+            BufferedWriter merchandiseCategoryWriter = new BufferedWriter(new FileWriter("Database/MerchandiseCategoryIndex.txt"));
+            writeCategoryIndexToTextFile(merchandiseCategoryWriter, merchandiseCategoryIndex);
+            merchandiseCategoryWriter.close();
+
+
+            // writing each customization to respective text file
+            BufferedWriter drinkCustomizationWriter = new BufferedWriter(new FileWriter("Database/DrinkCustomizations.txt"));
+            writeCustomizationsToTextFile(drinkCustomizationWriter, drinkCustomizations);
+            drinkCustomizationWriter.close();
+
+            BufferedWriter foodCustomizationWriter = new BufferedWriter(new FileWriter("Database/FoodCustomizations.txt"));
+            writeCustomizationsToTextFile(foodCustomizationWriter, foodCustomizations);
+            foodCustomizationWriter.close();
+
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error storing data to text files: " +e.getMessage());
+        }
+    }
+
+    private void writeItemsToTextFile(BufferedWriter writer, String itemType, ItemCharacteristics item) throws IOException {
+
+        writer.write(item.getItemCode() + "," + item.getName() + "," + itemType + "," + item.getCategory());
+        writer.newLine();
+
+        StringJoiner joiner = new StringJoiner(",");
+        for (Map.Entry<String, Float> entry : item.getSizesAndPrices().entrySet()) {
+            joiner.add(entry.getKey() + ":" + entry.getValue());
+        }
+        writer.write(joiner.toString());
+        writer.newLine();
+        writer.newLine();
+    }
+
+    private void writeCategoryIndexToTextFile(BufferedWriter writer, Map<String, Integer> categoryIndex) throws IOException {
+        for(Map.Entry<String, Integer> entry : categoryIndex.entrySet()) {
+            writer.write(entry.getKey() + "," + entry.getValue());
+            writer.newLine();
+        }
+    }
+
+    private void writeCustomizationsToTextFile(BufferedWriter writer, Map<String, Map<String, Float>> customizations) throws IOException {
+        for(Map.Entry<String, Map<String, Float>> entry : customizations.entrySet()) {
+            writer.write(entry.getKey() + "_");
+            Map<String, Float> optionAndPricesMap = entry.getValue();
+
+            StringJoiner joiner = new StringJoiner(",");
+            for(Map.Entry<String, Float> optionAndPricesEntry : optionAndPricesMap.entrySet()) {
+                joiner.add(optionAndPricesEntry.getKey() + ":" + optionAndPricesEntry.getValue());
+            }
+            writer.write(joiner.toString());
+            writer.newLine();
+        }
+    }
+
 
     // Main Menu for user role selection
     public void showMainMenu() {
@@ -131,7 +357,6 @@ public class PointOfSale {
         int choice = getValidInput(1, 4);
         System.out.println("You selected merchandise category " + choice + ". Implement logic here.");
     }
-
 
     private void addItem() {
         System.out.println("Select Item Type: ");

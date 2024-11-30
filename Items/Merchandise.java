@@ -3,18 +3,18 @@ package Items;
 import java.util.Map;
 
 public class Merchandise extends ItemCharacteristics {
-    private String merchandiseType; // e.g., T-Shirts, Bags, Mugs, Others
+    private String merchandiseCategory; // e.g., T-Shirts, Bags, Mugs, Others
 
-    public Merchandise(String itemCode, String itemName, String itemCategory, Map<String, Float> sizesAndPricesMap, String merchandiseType) {
-        super(itemCode, itemName, itemCategory, sizesAndPricesMap);
-        this.merchandiseType = merchandiseType;
+    public Merchandise(String itemCode, String itemName, String itemType, Map<String, Float> sizesAndPricesMap, String merchandiseCategory) {
+        super(itemCode, itemName, itemType, sizesAndPricesMap);
+        this.merchandiseCategory = merchandiseCategory;
     }
 
-    public String getMerchandiseType() {
-        return merchandiseType;
+    public String getMerchandiseCategory() {
+        return merchandiseCategory;
     }
 
-    public void setMerchandiseType(String merchandiseType) {
-        this.merchandiseType = merchandiseType;
+    public void setMerchandiseCategory(String merchandiseCategory) {
+        this.merchandiseCategory = merchandiseCategory;
     }
 }
