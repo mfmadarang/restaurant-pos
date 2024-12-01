@@ -36,8 +36,8 @@ public class PointOfSale {
     Map <String, Integer> foodCategoryIndex = new HashMap<>();
     Map <String, Integer> merchandiseCategoryIndex = new HashMap<>();
 
-    ArrayList<Customization> drinkCustomizations = new ArrayList<>();
-    ArrayList<Customization> foodCustomizations = new ArrayList<>();
+    Map<String, Map<String, Float>> drinkCustomizations = new HashMap<>();
+    Map<String, Map<String, Float>> foodCustomizations = new HashMap<>();
 
     public void fetchDataFromTextFile() {
         try {
@@ -130,9 +130,9 @@ public class PointOfSale {
         return CategoryIndex;
     }
 
-    private ArrayList<Customization> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
+    private Map<String, Map<String, Float>> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
+        Map<String, Map<String, Float>> customizationsMap = new HashMap<>();
         String line = reader.readLine();
-        ArrayList<Customization> customizationsList = new ArrayList<>();
         while (line != null) {
             if (line.trim().isEmpty()) {
                 line = reader.readLine();
@@ -150,12 +150,12 @@ public class PointOfSale {
                 optionsAndPricesMap.put(option, Float.parseFloat(data2[1]));
             }
 
-            Customization customization = new Customization (customizationName, optionsAndPricesMap);
-            customizationsList.add(customization);
+            customizationsMap.put(customizationName, optionsAndPricesMap);
             line = reader.readLine();
         }
-        return customizationsList;
+        return customizationsMap;
     }
+
 
     public void storeDataToTextFile() {
         try {
@@ -233,21 +233,30 @@ public class PointOfSale {
         }
     }
 
-    private void writeCustomizationsToTextFile(BufferedWriter writer, ArrayList<Customization> customizations) throws IOException {
+    private void writeCustomizationsToTextFile(BufferedWriter writer, Map<String, Map<String, Float>> customizations) throws IOException {
+        for (Map.Entry<String, Map<String, Float>> customizationEntry : customizations.entrySet()) {
+            // Escape customization name
+            String escapedCustomizationName = customizationEntry.getKey()
+                    .replace("_", "\\_")
+                    .replace(",", "\\,")
+                    .replace(":", "\\:");
 
-        for (Customization customization: customizations) {
-            String escapedCustomizationName = customization.getCustomizationName().replace("_", "\\_").replace(",", "\\,").replace(":", "\\:");
             writer.write(escapedCustomizationName + "_");
 
-            Map<String, Float> optionsAndPrices = customization.getOptionsAndPrices();
-
+            // Process the options and prices
+            Map<String, Float> optionsAndPrices = customizationEntry.getValue();
             StringJoiner joiner = new StringJoiner(",");
-            for (Map.Entry<String, Float> entry : optionsAndPrices.entrySet()) {
-                joiner.add(entry.getKey().replace(",", "\\,").replace(":", "\\:").replace("_", "\\_") + ":" + entry.getValue());
+
+            for (Map.Entry<String, Float> optionEntry : optionsAndPrices.entrySet()) {
+                String escapedOptionName = optionEntry.getKey()
+                        .replace(",", "\\,")
+                        .replace(":", "\\:")
+                        .replace("_", "\\_");
+                joiner.add(escapedOptionName + ":" + optionEntry.getValue());
             }
+
             writer.write(joiner.toString());
             writer.newLine();
-
         }
     }
 
