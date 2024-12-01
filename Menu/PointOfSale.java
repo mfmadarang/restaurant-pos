@@ -11,6 +11,7 @@ public class PointOfSale {
     public static void main(String[] args) {
         PointOfSale pos = new PointOfSale();
         pos.fetchDataFromTextFile();
+        pos.showMainMenu();
 
         for(ItemCharacteristics item: pos.Items) {
             System.out.println(item.getItemCode());
@@ -250,7 +251,6 @@ public class PointOfSale {
         }
     }
 
-
     // Main Menu for user role selection
     public void showMainMenu() {
         System.out.println("Select User:");
@@ -260,30 +260,15 @@ public class PointOfSale {
 
         int choice = getValidInput(1, 3);
 
+        CashierMainMenu cashierMainMenu = new CashierMainMenu();
+
         switch (choice) {
-            case 1 -> showCashierMenu();
+            case 1 -> cashierMainMenu.showCashierMenu();
             case 2 -> showManagerMenu();
             case 3 -> System.out.println("Exiting the system. Goodbye!");
         }
     }
 
-    // Menu for Cashier
-    private void showCashierMenu() {
-        System.out.println("Welcome, Cashier!");
-        System.out.println("Select option:");
-        System.out.println("(1) Place Order");
-        System.out.println("(2) Logout");
-
-        int choice = getValidInput(1, 2);
-
-        switch (choice) {
-            case 1 -> startTransaction();
-            case 2 -> {
-                System.out.println("Logging out...");
-                showMainMenu();
-            }
-        }
-    }
 
     // Menu for Manager
     private void showManagerMenu() {
@@ -305,62 +290,6 @@ public class PointOfSale {
                 showMainMenu();
             }
         }
-    }
-
-    // Start a new transaction for the Cashier
-    private void startTransaction() {
-        System.out.println("Select Item Type:");
-        System.out.println("(1) Drinks");
-        System.out.println("(2) Food");
-        System.out.println("(3) Merchandise");
-        System.out.println("(4) Cancel Transaction");
-
-        int choice = getValidInput(1, 4);
-
-        switch (choice) {
-            case 1 -> selectDrink();
-            case 2 -> selectFood();
-            case 3 -> selectMerchandise();
-            case 4 -> {
-                System.out.println("Transaction canceled.");
-                showCashierMenu();
-            }
-        }
-    }
-
-    // Methods for item selection
-    private void selectDrink() {
-        System.out.println("Select Drink Category:");
-        System.out.println("(1) Espresso Drinks");
-        System.out.println("(2) Blended Drinks");
-        System.out.println("(3) Tea");
-        System.out.println("(4) Others");
-
-        int choice = getValidInput(1, 4);
-        System.out.println("You selected drink category " + choice + ". Implement logic here.");
-    }
-
-    private void selectFood() {
-        System.out.println("Select Food Category:");
-        System.out.println("(1) Pastries");
-        System.out.println("(2) Cakes");
-        System.out.println("(3) Sandwiches");
-        System.out.println("(4) Pastas");
-        System.out.println("(5) Others");
-
-        int choice = getValidInput(1, 5);
-        System.out.println("You selected food category " + choice + ". Implement logic here.");
-    }
-
-    private void selectMerchandise() {
-        System.out.println("Select Merchandise Category:");
-        System.out.println("(1) T-Shirts");
-        System.out.println("(2) Bags");
-        System.out.println("(3) Mugs");
-        System.out.println("(4) Others");
-
-        int choice = getValidInput(1, 4);
-        System.out.println("You selected merchandise category " + choice + ". Implement logic here.");
     }
 
     private void addItem() {
