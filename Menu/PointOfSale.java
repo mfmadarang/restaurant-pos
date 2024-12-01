@@ -35,9 +35,8 @@ public class PointOfSale {
     Map <String, Integer> foodCategoryIndex = new HashMap<>();
     Map <String, Integer> merchandiseCategoryIndex = new HashMap<>();
 
-    Map <String, Map<String, Float>> drinkCustomizations = new HashMap<>();
-    Map <String, Map<String, Float>> foodCustomizations = new HashMap<>();
-
+    ArrayList<Customization> drinkCustomizations = new ArrayList<>();
+    ArrayList<Customization> foodCustomizations = new ArrayList<>();
 
     public void fetchDataFromTextFile() {
         try {
@@ -84,15 +83,15 @@ public class PointOfSale {
                 continue;
             }
 
-            String[] data = line.split(",");
+            String[] data = line.split("(?<!\\\\),");
             String itemCode = data[0];
-            String name = data[1];
+            String name = data[1].replace("\\,", ",");
             String itemType = data[2];
-            String category = data[3];
+            String category = data[3].replace("\\,", ",");
             Map<String, Float> sizesAndPricesMap = new HashMap<>();
 
             line = reader.readLine();
-            data = line.split(",");
+            data = line.split("(?<!\\\\),");
 
             for (String datum : data) {
                 String[] data2 = datum.split(":");
@@ -119,8 +118,8 @@ public class PointOfSale {
                 line = reader.readLine();
                 continue;
             }
-            String[] data = line.split(",");
-            String category = data[0];
+            String[] data = line.split("(?<!\\\\),");
+            String category = data[0].replace("\\,", ",");
             Integer index = Integer.parseInt(data[1]);
             line = reader.readLine();
 
@@ -130,32 +129,31 @@ public class PointOfSale {
         return CategoryIndex;
     }
 
-    private Map<String, Map<String, Float>> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
+    private ArrayList<Customization> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
         String line = reader.readLine();
-        Map<String, Map<String, Float>> customizations = new HashMap<>();
-
+        ArrayList<Customization> customizationsList = new ArrayList<>();
         while (line != null) {
-
             if (line.trim().isEmpty()) {
                 line = reader.readLine();
                 continue;
             }
 
-            String[] data = line.split("_");
-            String customization = data[0];
-            String[] optionsAndPricesList = data[1].split(",");
+            String[] data = line.split("(?<!\\\\)_");
+            String customizationName = data[0].replace("\\_", "_").replace("\\,", ",").replace("\\:", ":");
 
+            String[] optionsAndPricesList = data[1].split("(?<!\\\\),");
             Map<String, Float> optionsAndPricesMap = new HashMap<>();
-
             for (String optionAndPrices : optionsAndPricesList) {
-                String[] data2 = optionAndPrices.split(":");
-                optionsAndPricesMap.put(data2[0], Float.parseFloat(data2[1]));
+                String[] data2 = optionAndPrices.split("(?<!\\\\):");
+                String option = data2[0].replace("\\,", ",").replace("\\:", ":").replace("\\_", "_");
+                optionsAndPricesMap.put(option, Float.parseFloat(data2[1]));
             }
 
-            customizations.put(customization, optionsAndPricesMap);
+            Customization customization = new Customization (customizationName, optionsAndPricesMap);
+            customizationsList.add(customization);
             line = reader.readLine();
         }
-        return customizations;
+        return customizationsList;
     }
 
     public void storeDataToTextFile() {
@@ -211,13 +209,16 @@ public class PointOfSale {
     }
 
     private void writeItemsToTextFile(BufferedWriter writer, String itemType, ItemCharacteristics item) throws IOException {
+        String escapedCategory = item.getCategory().replace(",", "\\,");
+        String escapedName = item.getName().replace(",", "\\,");
 
-        writer.write(item.getItemCode() + "," + item.getName() + "," + itemType + "," + item.getCategory());
+        writer.write(item.getItemCode() + "," + escapedName + "," + itemType + "," + escapedCategory);
         writer.newLine();
 
         StringJoiner joiner = new StringJoiner(",");
+
         for (Map.Entry<String, Float> entry : item.getSizesAndPrices().entrySet()) {
-            joiner.add(entry.getKey() + ":" + entry.getValue());
+            joiner.add(entry.getKey().replace(",", "\\,").replace(":", "\\:") + ":" + entry.getValue());
         }
         writer.write(joiner.toString());
         writer.newLine();
@@ -226,22 +227,26 @@ public class PointOfSale {
 
     private void writeCategoryIndexToTextFile(BufferedWriter writer, Map<String, Integer> categoryIndex) throws IOException {
         for(Map.Entry<String, Integer> entry : categoryIndex.entrySet()) {
-            writer.write(entry.getKey() + "," + entry.getValue());
+            writer.write(entry.getKey().replace(",", "\\,") + "," + entry.getValue());
             writer.newLine();
         }
     }
 
-    private void writeCustomizationsToTextFile(BufferedWriter writer, Map<String, Map<String, Float>> customizations) throws IOException {
-        for(Map.Entry<String, Map<String, Float>> entry : customizations.entrySet()) {
-            writer.write(entry.getKey() + "_");
-            Map<String, Float> optionAndPricesMap = entry.getValue();
+    private void writeCustomizationsToTextFile(BufferedWriter writer, ArrayList<Customization> customizations) throws IOException {
+
+        for (Customization customization: customizations) {
+            String escapedCustomizationName = customization.getCustomizationName().replace("_", "\\_").replace(",", "\\,").replace(":", "\\:");
+            writer.write(escapedCustomizationName + "_");
+
+            Map<String, Float> optionsAndPrices = customization.getOptionsAndPrices();
 
             StringJoiner joiner = new StringJoiner(",");
-            for(Map.Entry<String, Float> optionAndPricesEntry : optionAndPricesMap.entrySet()) {
-                joiner.add(optionAndPricesEntry.getKey() + ":" + optionAndPricesEntry.getValue());
+            for (Map.Entry<String, Float> entry : optionsAndPrices.entrySet()) {
+                joiner.add(entry.getKey().replace(",", "\\,").replace(":", "\\:").replace("_", "\\_") + ":" + entry.getValue());
             }
             writer.write(joiner.toString());
             writer.newLine();
+
         }
     }
 
@@ -807,4 +812,3 @@ public class PointOfSale {
         }
     }
 }
-
