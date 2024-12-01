@@ -1,5 +1,0 @@
-PA-SPAGH-001,Spaghetti,Food,Pasta
-Small:50,Medium:100,Large:150
-
-CN-ADOB-001,Adobo,Food,Chicken
-Medium:50,Large:100
