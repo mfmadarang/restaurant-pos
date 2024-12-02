@@ -273,7 +273,17 @@ public class PointOfSale {
 
         switch (choice) {
             case 1 -> cashierMainMenu.showCashierMenu();
-            case 2 -> showManagerMenu();
+            case 2 -> {
+                ManagerMainMenu managerMainMenu = new ManagerMainMenu(
+                        Items,
+                        drinksCategoryIndex,
+                        foodCategoryIndex,
+                        merchandiseCategoryIndex,
+                        drinkCustomizations,
+                        foodCustomizations
+                );
+                managerMainMenu.showManagerMenu();
+            }
             case 3 -> System.out.println("Exiting the system. Goodbye!");
         }
     }
