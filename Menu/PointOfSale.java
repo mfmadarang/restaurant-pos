@@ -11,18 +11,34 @@ public class PointOfSale {
     public static void main(String[] args) {
         PointOfSale pos = new PointOfSale();
         pos.fetchDataFromTextFile();
-        pos.showMainMenu();
+        //pos.showMainMenu();
 
         for(ItemCharacteristics item: pos.Items) {
             System.out.println(item.getItemCode());
             System.out.println(item.getName());
             System.out.println(item.getCategory());
             item.displaySizesAndPrices();
+
+            if (item instanceof Drink) {
+                System.out.println(((Drink) item).getCustomizations());
+            }
+            else if (item instanceof Food) {
+                System.out.println(((Food) item).getCustomizations());
+            }
+
             System.out.println();
         }
+
         Map<String, Float> sizesAndPricesMap = new HashMap<>();
         sizesAndPricesMap.put("Large", 50F);
-        pos.Items.add(new Drink("SS-SPRI-002", "Sprite", "Drink", sizesAndPricesMap, "Soft Drinks"));
+
+        Map<String, Map<String,Float>> customizations = new HashMap<>();
+        Map<String, Float> optionsAndPrices = new HashMap<>();
+        optionsAndPrices.put("Add Brown Sugar", 10F);
+        optionsAndPrices.put("Add White Sugar", 20F);
+        customizations.put("Add Sugar", optionsAndPrices);
+
+        pos.Items.add(new Drink("SS-SPRI-002", "Sprite", "Drink", sizesAndPricesMap, "Soft Drinks", customizations));
 
         pos.storeDataToTextFile();
 
@@ -61,13 +77,6 @@ public class PointOfSale {
             reader = new BufferedReader(new FileReader("Database/MerchandiseCategoryIndex.txt"));
             merchandiseCategoryIndex = scanCategoryIndexFromFile(reader);
 
-            // scanning customizations from respective text files and storing it into customizations map
-            reader = new BufferedReader(new FileReader("Database/DrinkCustomizations.txt"));
-            drinkCustomizations = scanCustomizationsFromFile(reader);
-
-            reader = new BufferedReader(new FileReader("Database/FoodCustomizations.txt"));
-            foodCustomizations = scanCustomizationsFromFile(reader);
-
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -99,9 +108,12 @@ public class PointOfSale {
                 sizesAndPricesMap.put(data2[0], Float.parseFloat(data2[1]));
             }
 
+            Map<String, Map<String, Float>> customizations;
+            customizations = scanCustomizationsFromFile(reader);
+
             switch (itemType) {
-                case "Drink" -> Items.add(new Drink(itemCode, name, itemType, sizesAndPricesMap, category));
-                case "Food" -> Items.add(new Food(itemCode, name, itemType, sizesAndPricesMap, category));
+                case "Drink" -> Items.add(new Drink(itemCode, name, itemType, sizesAndPricesMap, category, customizations));
+                case "Food" -> Items.add(new Food(itemCode, name, itemType, sizesAndPricesMap, category, customizations));
                 case "Merchandise" -> Items.add(new Merchandise(itemCode, name, itemType, sizesAndPricesMap, category));
             }
 
@@ -131,13 +143,15 @@ public class PointOfSale {
     }
 
     private Map<String, Map<String, Float>> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
-        Map<String, Map<String, Float>> customizationsMap = new HashMap<>();
+        Map<String, Map<String, Float>> customizationsMap = null;
         String line = reader.readLine();
+
         while (line != null) {
             if (line.trim().isEmpty()) {
-                line = reader.readLine();
-                continue;
+                break;
             }
+
+            customizationsMap = new HashMap<>();
 
             String[] data = line.split("(?<!\\\\)_");
             String customizationName = data[0].replace("\\_", "_").replace("\\,", ",").replace("\\:", ":");
@@ -193,17 +207,6 @@ public class PointOfSale {
             writeCategoryIndexToTextFile(merchandiseCategoryWriter, merchandiseCategoryIndex);
             merchandiseCategoryWriter.close();
 
-
-            // writing each customization to respective text file
-            BufferedWriter drinkCustomizationWriter = new BufferedWriter(new FileWriter("Database/DrinkCustomizations.txt"));
-            writeCustomizationsToTextFile(drinkCustomizationWriter, drinkCustomizations);
-            drinkCustomizationWriter.close();
-
-            BufferedWriter foodCustomizationWriter = new BufferedWriter(new FileWriter("Database/FoodCustomizations.txt"));
-            writeCustomizationsToTextFile(foodCustomizationWriter, foodCustomizations);
-            foodCustomizationWriter.close();
-
-
         } catch (IOException e) {
             throw new RuntimeException("Error storing data to text files: " +e.getMessage());
         }
@@ -223,6 +226,18 @@ public class PointOfSale {
         }
         writer.write(joiner.toString());
         writer.newLine();
+
+        if (item instanceof Drink) {
+            if (((Drink) item).getCustomizations() != null) {
+                writeCustomizationsToTextFile(writer, ((Drink) item).getCustomizations());
+            }
+        }
+        else if (item instanceof Food) {
+            if (((Food) item).getCustomizations() != null) {
+                writeCustomizationsToTextFile(writer, ((Food) item).getCustomizations());
+            }
+        }
+
         writer.newLine();
     }
 
@@ -234,6 +249,7 @@ public class PointOfSale {
     }
 
     private void writeCustomizationsToTextFile(BufferedWriter writer, Map<String, Map<String, Float>> customizations) throws IOException {
+
         for (Map.Entry<String, Map<String, Float>> customizationEntry : customizations.entrySet()) {
             // Escape customization name
             String escapedCustomizationName = customizationEntry.getKey()
@@ -272,15 +288,13 @@ public class PointOfSale {
         CashierMainMenu cashierMainMenu = new CashierMainMenu();
 
         switch (choice) {
-            case 1 -> cashierMainMenu.showCashierMenu();
+            case 1 -> cashierMainMenu.showCashierMenu(Items);
             case 2 -> {
                 ManagerMainMenu managerMainMenu = new ManagerMainMenu(
                         Items,
                         drinksCategoryIndex,
                         foodCategoryIndex,
-                        merchandiseCategoryIndex,
-                        drinkCustomizations,
-                        foodCustomizations
+                        merchandiseCategoryIndex
                 );
                 managerMainMenu.showManagerMenu();
             }
@@ -343,19 +357,13 @@ public class PointOfSale {
         // Create the item based on type
         switch (itemTypeChoice) {
             case 1 -> {
-                Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category);
+                Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category, customizations);
                 Items.add(newDrink);
-                if (customizations != null) {
-                    drinkCustomizations.putAll(customizations);
-                }
-                System.out.println("Drink added successfully with Item Code: " + itemCode);
+
             }
             case 2 -> {
-                Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category);
+                Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category, customizations);
                 Items.add(newFood);
-                if (customizations != null) {
-                    foodCustomizations.putAll(customizations);
-                }
                 System.out.println("Food item added successfully with Item Code: " + itemCode);
             }
             case 3 -> {
