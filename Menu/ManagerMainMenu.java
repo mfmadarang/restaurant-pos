@@ -2,6 +2,9 @@ package Menu;
 
 import Items.*;
 import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class ManagerMainMenu {
     private Scanner scanner;
@@ -16,24 +19,137 @@ public class ManagerMainMenu {
     }
 
     public void showManagerMenu() {
-        System.out.println("Welcome, Manager!");
-        System.out.println("Select option:");
-        System.out.println("(1) Add Item");
-        System.out.println("(2) Modify Item");
-        System.out.println("(3) Remove Item");
-        System.out.println("(4) Logout");
+        while (true) {
+            System.out.println("Welcome, Manager!");
+            System.out.println("Select option:");
+            System.out.println("(1) Add Item");
+            System.out.println("(2) Modify Item");
+            System.out.println("(3) Remove Item");
+            System.out.println("(4) Import Items from File");
+            System.out.println("(5) Logout");
 
-        int choice = getValidInput(1, 4);
+            int choice = getValidInput(1, 5);
 
-        switch (choice) {
-            case 1 -> addItem();
-            case 2 -> modifyItem();
-            case 3 -> removeItem();
-            case 4 -> {
-                System.out.println("Logging out...");
-                pointOfSale.showMainMenu();
+            switch (choice) {
+                case 1 -> addItem();
+                case 2 -> modifyItem();
+                case 3 -> removeItem();
+                case 4 -> importItemsFromFile();
+                case 5 -> {
+                    System.out.println("Logging out...");
+                    return;
+                }
             }
         }
+    }
+
+    public void importItemsFromFile() {
+        System.out.println("Enter the path to the file to import:");
+        String filePath = scanner.nextLine();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            int successCount = 0;
+            int errorCount = 0;
+
+            while ((line = reader.readLine()) != null) {
+                try {
+                    processFileImportLine(line);
+                    successCount++;
+                } catch (Exception e) {
+                    System.out.println("Error importing line: " + line + " - " + e.getMessage());
+                    errorCount++;
+                }
+            }
+
+            System.out.println("Import completed.");
+            System.out.println("Successfully imported: " + successCount + " items");
+            System.out.println("Failed to import: " + errorCount + " items");
+
+            pointOfSale.storeDataToTextFile();
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+    }
+
+    private void processFileImportLine(String line) {
+        String[] parts = line.split(",");
+        if (parts.length < 5) {
+            throw new IllegalArgumentException("Insufficient data in line");
+        }
+
+        // Parse line: ItemType, Name, Category, Size1:Price1, Size2:Price2, Customization1:Option1:Price1, ...
+        String itemType = parts[0].trim();
+        String itemName = parts[1].trim();
+        String category = parts[2].trim();
+
+        // Parse sizes and prices
+        Map<String, Float> sizesAndPricesMap = parseSizesAndPrices(parts[3], parts[4]);
+
+        // Determine item type for creation
+        int itemTypeChoice = getItemTypeChoice(itemType);
+
+        // Parse customizations (optional)
+        Map<String, Map<String, Float>> customizations =
+                parts.length > 5 ? parseCustomizations(Arrays.copyOfRange(parts, 5, parts.length)) : null;
+
+        // Generate item code
+        String itemCode = generateItemCode(itemTypeChoice, category, itemName);
+
+        // Create item based on type
+        switch (itemTypeChoice) {
+            case 1 -> {
+                Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category, customizations);
+                pointOfSale.Items.add(newDrink);
+            }
+            case 2 -> {
+                Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category, customizations);
+                pointOfSale.Items.add(newFood);
+            }
+            case 3 -> {
+                Merchandise newMerchandise = new Merchandise(itemCode, itemName, "Merchandise", sizesAndPricesMap, category);
+                pointOfSale.Items.add(newMerchandise);
+            }
+        }
+    }
+
+    private Map<String, Float> parseSizesAndPrices(String... sizePriceParts) {
+        Map<String, Float> sizesAndPricesMap = new HashMap<>();
+        for (String sizePricePart : sizePriceParts) {
+            String[] sizePrice = sizePricePart.split(":");
+            if (sizePrice.length == 2) {
+                sizesAndPricesMap.put(sizePrice[0].trim(), Float.parseFloat(sizePrice[1].trim()));
+            }
+        }
+        return sizesAndPricesMap;
+    }
+
+    private Map<String, Map<String, Float>> parseCustomizations(String... customizationParts) {
+        Map<String, Map<String, Float>> customizations = new HashMap<>();
+        for (String customizationPart : customizationParts) {
+            String[] parts = customizationPart.split(":");
+            if (parts.length >= 3) {
+                String customizationName = parts[0].trim();
+                String optionName = parts[1].trim();
+                Float optionPrice = Float.parseFloat(parts[2].trim());
+
+                customizations.computeIfAbsent(customizationName, k -> new HashMap<>())
+                        .put(optionName, optionPrice);
+            }
+        }
+        return customizations.isEmpty() ? null : customizations;
+    }
+
+    private int getItemTypeChoice(String itemType) {
+        List<String> drinkTypes = Arrays.asList("Drink", "Espresso", "Blended", "Tea");
+        List<String> foodTypes = Arrays.asList("Food", "Pastry", "Cake", "Sandwich", "Pasta");
+        List<String> merchandiseTypes = Arrays.asList("Merchandise", "TShirt", "Bag", "Mug");
+
+        if (drinkTypes.contains(itemType)) return 1;
+        if (foodTypes.contains(itemType)) return 2;
+        if (merchandiseTypes.contains(itemType)) return 3;
+
+        throw new IllegalArgumentException("Unknown item type: " + itemType);
     }
 
     public void addItem() {
