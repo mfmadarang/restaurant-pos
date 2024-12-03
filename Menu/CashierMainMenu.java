@@ -1,12 +1,15 @@
 package Menu;
 
+import Items.Drink;
+import Items.ItemCharacteristics;
+
 import java.util.*;
 
 public class CashierMainMenu {
     private final Scanner scanner = new Scanner(System.in);
     private List<String> orderSummary = new ArrayList<>();
 
-    public void showCashierMenu() {
+    public void showCashierMenu(ArrayList<ItemCharacteristics> Items) {
         // Create new transaction
         System.out.println("Welcome, Cashier!");
         System.out.println("Select option:");
@@ -16,12 +19,12 @@ public class CashierMainMenu {
         int choice = getValidInput(1, 2);
 
         switch (choice) {
-            case 1 -> startTransaction();
+            case 1 -> startTransaction(Items);
             case 2 -> System.out.println("Logging out...");
         }
     }
 
-    private void startTransaction() {
+    private void startTransaction(ArrayList<ItemCharacteristics> Items) {
         // Display current order summary
         if (!orderSummary.isEmpty()) {
             System.out.println("\n--- Current Order Summary ---");
@@ -52,6 +55,62 @@ public class CashierMainMenu {
                 orderSummary.clear(); // Clear the order summary after cancellation
             }
         }
+    }
+
+    /**
+     * Methods suggestions for efficient implementation of Cashier Main Menu
+     *
+     * @param Items
+     */
+
+    private void selectDrinkAlternative(ArrayList<ItemCharacteristics> Items) {
+        ArrayList<ItemCharacteristics> DrinkList = new ArrayList<>();
+        Set<String> categorySet = new HashSet<>();
+
+        for (ItemCharacteristics item : Items) {
+            if (item instanceof Drink) {
+                DrinkList.add(item);
+            }
+
+            String category = item.getCategory();
+            categorySet.add(category);
+
+        }
+
+        List<String> uniqueCategoryList = new ArrayList<>(categorySet);
+        System.out.println("Select Drink Category:");
+        int index = 1;
+        for (String category : uniqueCategoryList) {
+            System.out.println("(" + index + ") " + category);
+            index++;
+        }
+
+        int choice = getValidInput(1, index);
+        String chosenCategory = uniqueCategoryList.get(choice - 1);
+        ArrayList<ItemCharacteristics> categoryItems = new ArrayList<>();
+
+        for (ItemCharacteristics item : DrinkList) {
+            if(item.getCategory().equals(chosenCategory)) {
+                categoryItems.add(item);
+            }
+        }
+
+        showCategoryItems(categoryItems, "Drink", chosenCategory);
+
+    }
+
+    private void showCategoryItems(ArrayList<ItemCharacteristics> categoryItems, String itemType, String category) {
+        System.out.println("Select a" + itemType + " from " + category +" category:");
+        int index = 1;
+        for (ItemCharacteristics item : categoryItems) {
+            System.out.println("(" + index + ") " + item.getName());
+            index++;
+        }
+        int choice = getValidInput(1, index);
+        ItemCharacteristics chosenItem = categoryItems.get(choice - 1);
+
+        // implement logic for the chosenItem
+
     }
 
     private void selectDrink() {

@@ -12,7 +12,7 @@ public class ManagerMainMenu {
         this.scanner = new Scanner(System.in);
     }
 
-    public ManagerMainMenu(ArrayList<ItemCharacteristics> items, Map<String, Integer> drinksCategoryIndex, Map<String, Integer> foodCategoryIndex, Map<String, Integer> merchandiseCategoryIndex, ArrayList<Customization> drinkCustomizations, ArrayList<Customization> foodCustomizations) {
+    public ManagerMainMenu(ArrayList<ItemCharacteristics> items, Map<String, Integer> drinksCategoryIndex, Map<String, Integer> foodCategoryIndex, Map<String, Integer> merchandiseCategoryIndex) {
     }
 
     public void showManagerMenu() {
@@ -68,19 +68,14 @@ public class ManagerMainMenu {
         // Create the item based on type
         switch (itemTypeChoice) {
             case 1 -> {
-                Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category);
+                Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category, customizations);
                 pointOfSale.Items.add(newDrink);
-                if (customizations != null) {
-                    pointOfSale.drinkCustomizations.addAll((Collection<? extends Customization>) customizations);
-                }
+
                 System.out.println("Drink added successfully with Item Code: " + itemCode);
             }
             case 2 -> {
-                Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category);
+                Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category, customizations);
                 pointOfSale.Items.add(newFood);
-                if (customizations != null) {
-                    pointOfSale.foodCustomizations.addAll((Collection<? extends Customization>) customizations);
-                }
                 System.out.println("Food item added successfully with Item Code: " + itemCode);
             }
             case 3 -> {
@@ -224,9 +219,9 @@ public class ManagerMainMenu {
         // Determine which customization map to use based on item type
         Map<String, Map<String, Float>> customizationsMap = null;
         if (item instanceof Drink) {
-            customizationsMap = (Map<String, Map<String, Float>>) pointOfSale.drinkCustomizations;
+            customizationsMap = (Map<String, Map<String, Float>>) ((Drink) item).getCustomizations();
         } else if (item instanceof Food) {
-            customizationsMap = (Map<String, Map<String, Float>>) pointOfSale.foodCustomizations;
+            customizationsMap = (Map<String, Map<String, Float>>) ((Food) item).getCustomizations();
         } else {
             System.out.println("Customizations are only available for Drinks and Food.");
             return;
