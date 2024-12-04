@@ -1,2 +1,0 @@
-Pasta,1
-Chicken,1
