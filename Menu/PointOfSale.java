@@ -10,7 +10,6 @@ public class PointOfSale {
 
     public static void main(String[] args) {
         PointOfSale pos = new PointOfSale();
-        pos.showMainMenu();
         pos.fetchDataFromTextFile();
         //pos.showMainMenu();
 
@@ -171,6 +170,7 @@ public class PointOfSale {
         return customizationsMap;
     }
 
+
     public void storeDataToTextFile() {
         try {
             //writing item details from Items ArrayList to respective text file
@@ -285,17 +285,469 @@ public class PointOfSale {
 
         int choice = getValidInput(1, 3);
 
+        CashierMainMenu cashierMainMenu = new CashierMainMenu();
+
         switch (choice) {
-            case 1 -> {
-                CashierMainMenu cashierMainMenu = new CashierMainMenu();
-                cashierMainMenu.showCashierMenu(Items);
-            }
+            case 1 -> cashierMainMenu.showCashierMenu(Items);
             case 2 -> {
-                ManagerMainMenu managerMainMenu = new ManagerMainMenu(this);
+                ManagerMainMenu managerMainMenu = new ManagerMainMenu(
+                        Items,
+                        drinksCategoryIndex,
+                        foodCategoryIndex,
+                        merchandiseCategoryIndex
+                );
                 managerMainMenu.showManagerMenu();
             }
             case 3 -> System.out.println("Exiting the system. Goodbye!");
         }
+    }
+
+
+    // Menu for Manager
+    private void showManagerMenu() {
+        System.out.println("Welcome, Manager!");
+        System.out.println("Select option:");
+        System.out.println("(1) Add Item");
+        System.out.println("(2) Modify Item");
+        System.out.println("(3) Remove Item");
+        System.out.println("(4) Logout");
+
+        int choice = getValidInput(1, 4);
+
+        switch (choice) {
+            case 1 -> addItem();
+            case 2 -> modifyItem();
+            case 3 -> removeItem();
+            case 4 -> {
+                System.out.println("Logging out...");
+                showMainMenu();
+            }
+        }
+    }
+
+    private void addItem() {
+        System.out.println("Select Item Type: ");
+        System.out.println("(1) Drinks");
+        System.out.println("(2) Food");
+        System.out.println("(3) Merchandise");
+
+        int itemTypeChoice = getValidInput(1, 3);
+
+        System.out.println("Input Item Name: ");
+        String itemName = scanner.nextLine();
+
+        System.out.println("Add different Sizes? ");
+        System.out.println("(1) Yes");
+        System.out.println("(2) No");
+        int sizeChoice = getValidInput(1, 2);
+
+        Map<String, Float> sizesAndPricesMap = addSizes(sizeChoice);
+
+        System.out.println("Enter Category: ");
+        String category = scanner.nextLine();
+
+        String itemCode = generateItemCode(itemTypeChoice, category, itemName);
+
+        // Add customizations for Drinks and Food
+        Map<String, Map<String, Float>> customizations = null;
+        if (itemTypeChoice != 3) { // Not Merchandise
+            customizations = addCustomizations(itemTypeChoice);
+        }
+
+        // Create the item based on type
+        switch (itemTypeChoice) {
+            case 1 -> {
+                Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category, customizations);
+                Items.add(newDrink);
+
+            }
+            case 2 -> {
+                Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category, customizations);
+                Items.add(newFood);
+                System.out.println("Food item added successfully with Item Code: " + itemCode);
+            }
+            case 3 -> {
+                Merchandise newMerchandise = new Merchandise(itemCode, itemName, "Merchandise", sizesAndPricesMap, category);
+                Items.add(newMerchandise);
+                System.out.println("Merchandise added successfully with Item Code: " + itemCode);
+            }
+        }
+
+        // Store updated data
+        storeDataToTextFile();
+    }
+
+    private Map<String, Map<String, Float>> addCustomizations(int itemTypeChoice) {
+        Map<String, Map<String, Float>> customizations = new HashMap<>();
+
+        System.out.println("Do you want to add customizations?");
+        System.out.println("(1) Yes");
+        System.out.println("(2) No");
+        int customizationChoice = getValidInput(1, 2);
+
+        while (customizationChoice == 1) {
+            System.out.println("Enter Customization Name:");
+            String customizationName = scanner.nextLine();
+
+            Map<String, Float> optionsAndPrices = new HashMap<>();
+            int optionCount = 0;
+            while (optionCount < 5) {
+                System.out.println("Enter Customization Option (or press Enter to finish):");
+                String optionName = scanner.nextLine();
+                if (optionName.isEmpty()) break;
+
+                System.out.println("Enter Price for " + optionName + ":");
+                float optionPrice = scanner.nextFloat();
+                scanner.nextLine(); // consume newline
+
+                optionsAndPrices.put(optionName, optionPrice);
+                optionCount++;
+
+                if (optionCount == 5) {
+                    System.out.println("Maximum number of options (5) reached.");
+                    break;
+                }
+            }
+
+            customizations.put(customizationName, optionsAndPrices);
+
+            System.out.println("Do you want to add another customization?");
+            System.out.println("(1) Yes");
+            System.out.println("(2) No");
+            customizationChoice = getValidInput(1, 2);
+        }
+
+        return customizations.isEmpty() ? null : customizations;
+    }
+
+    private void modifyItem() {
+        System.out.println("Enter Item Code to Modify:");
+        String itemCode = scanner.nextLine();
+
+        // Find the item with the given item code
+        ItemCharacteristics itemToModify = null;
+        for (ItemCharacteristics item : Items) {
+            if (item.getItemCode().equals(itemCode)) {
+                itemToModify = item;
+                break;
+            }
+        }
+
+        if (itemToModify == null) {
+            System.out.println("Item not found with Item Code: " + itemCode);
+            return;
+        }
+
+        System.out.println("Select what to modify:");
+        System.out.println("(1) Sizes and Prices");
+        System.out.println("(2) Customizations");
+        System.out.println("(3) Cancel");
+
+        int modifyChoice = getValidInput(1, 3);
+
+        switch (modifyChoice) {
+            case 1 -> modifySizesAndPrices(itemToModify);
+            case 2 -> modifyCustomizations(itemToModify);
+            case 3 -> {
+                System.out.println("Modification canceled.");
+                return;
+            }
+        }
+
+        // Store updated data
+        storeDataToTextFile();
+    }
+
+    private void modifySizesAndPrices(ItemCharacteristics item) {
+        Map<String, Float> sizesAndPrices = item.getSizesAndPrices();
+
+        while (true) {
+            System.out.println("Current Sizes and Prices:");
+            for (Map.Entry<String, Float> entry : sizesAndPrices.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
+
+            System.out.println("Select action:");
+            System.out.println("(1) Add/Modify Size");
+            System.out.println("(2) Remove Size");
+            System.out.println("(3) Finish");
+
+            int choice = getValidInput(1, 3);
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.println("Enter Size Name:");
+                    String sizeName = scanner.nextLine();
+                    System.out.println("Enter Price:");
+                    float price = scanner.nextFloat();
+                    scanner.nextLine(); // consume newline
+                    sizesAndPrices.put(sizeName, price);
+                }
+                case 2 -> {
+                    System.out.println("Enter Size Name to Remove:");
+                    String sizeToRemove = scanner.nextLine();
+                    if (sizesAndPrices.containsKey(sizeToRemove)) {
+                        sizesAndPrices.remove(sizeToRemove);
+                    } else {
+                        System.out.println("Size not found.");
+                    }
+                }
+                case 3 -> {
+                    return;
+                }
+            }
+        }
+    }
+
+    private void modifyCustomizations(ItemCharacteristics item) {
+        // Determine which customization map to use based on item type
+        Map<String, Map<String, Float>> customizationsMap = null;
+        if (item instanceof Drink) {
+            customizationsMap = drinkCustomizations;
+        } else if (item instanceof Food) {
+            customizationsMap = foodCustomizations;
+        } else {
+            System.out.println("Customizations are only available for Drinks and Food.");
+            return;
+        }
+
+        while (true) {
+            System.out.println("Current Customizations:");
+            if (customizationsMap.isEmpty()) {
+                System.out.println("No customizations found.");
+            } else {
+                for (String customization : customizationsMap.keySet()) {
+                    System.out.println(customization + ":");
+                    Map<String, Float> options = customizationsMap.get(customization);
+                    for (Map.Entry<String, Float> option : options.entrySet()) {
+                        System.out.println("  " + option.getKey() + ": " + option.getValue());
+                    }
+                }
+            }
+
+            System.out.println("Select action:");
+            System.out.println("(1) Add/Modify Customization");
+            System.out.println("(2) Remove Customization");
+            System.out.println("(3) Modify Customization Options");
+            System.out.println("(4) Finish");
+
+            int choice = getValidInput(1, 4);
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.println("Enter Customization Name:");
+                    String customizationName = scanner.nextLine();
+                    Map<String, Float> optionsAndPrices = new HashMap<>();
+
+                    int optionCount = 0;
+                    while (optionCount < 5) {
+                        System.out.println("Enter Customization Option (or press Enter to finish):");
+                        String optionName = scanner.nextLine();
+                        if (optionName.isEmpty()) break;
+
+                        System.out.println("Enter Price for " + optionName + ":");
+                        float optionPrice = scanner.nextFloat();
+                        scanner.nextLine(); // consume newline
+
+                        optionsAndPrices.put(optionName, optionPrice);
+                        optionCount++;
+
+                        if (optionCount == 5) {
+                            System.out.println("Maximum number of options (5) reached.");
+                            break;
+                        }
+                    }
+
+                    customizationsMap.put(customizationName, optionsAndPrices);
+                }
+                case 2 -> {
+                    System.out.println("Enter Customization Name to Remove:");
+                    String customizationToRemove = scanner.nextLine();
+                    if (customizationsMap.containsKey(customizationToRemove)) {
+                        customizationsMap.remove(customizationToRemove);
+                    } else {
+                        System.out.println("Customization not found.");
+                    }
+                }
+                case 3 -> {
+                    System.out.println("Enter Customization Name to Modify:");
+                    String customizationToModify = scanner.nextLine();
+                    if (customizationsMap.containsKey(customizationToModify)) {
+                        Map<String, Float> options = customizationsMap.get(customizationToModify);
+
+                        while (true) {
+                            System.out.println("Current Options for " + customizationToModify + ":");
+                            for (Map.Entry<String, Float> option : options.entrySet()) {
+                                System.out.println(option.getKey() + ": " + option.getValue());
+                            }
+
+                            System.out.println("Select action:");
+                            System.out.println("(1) Add/Modify Option");
+                            System.out.println("(2) Remove Option");
+                            System.out.println("(3) Finish");
+
+                            int optionChoice = getValidInput(1, 3);
+
+                            switch (optionChoice) {
+                                case 1 -> {
+                                    System.out.println("Enter Option Name:");
+                                    String optionName = scanner.nextLine();
+                                    System.out.println("Enter Price:");
+                                    float optionPrice = scanner.nextFloat();
+                                    scanner.nextLine(); // consume newline
+                                    options.put(optionName, optionPrice);
+                                }
+                                case 2 -> {
+                                    System.out.println("Enter Option Name to Remove:");
+                                    String optionToRemove = scanner.nextLine();
+                                    if (options.containsKey(optionToRemove)) {
+                                        options.remove(optionToRemove);
+                                    } else {
+                                        System.out.println("Option not found.");
+                                    }
+                                }
+                                case 3 -> {
+                                    break;
+                                }
+                            }
+
+                            if (optionChoice == 3) break;
+                        }
+                    } else {
+                        System.out.println("Customization not found.");
+                    }
+                }
+                case 4 -> {
+                    return;
+                }
+            }
+        }
+    }
+
+    private void removeItem() {
+        System.out.println("Enter Item Code to Remove:");
+        String itemCode = scanner.nextLine();
+
+        // Find and remove the item with the given item code
+        boolean itemRemoved = Items.removeIf(item -> item.getItemCode().equals(itemCode));
+
+        if (itemRemoved) {
+            System.out.println("Item with Code " + itemCode + " has been removed.");
+
+            // Remove associated customizations if applicable
+            drinkCustomizations.entrySet().removeIf(entry -> entry.getKey().startsWith(itemCode));
+            foodCustomizations.entrySet().removeIf(entry -> entry.getKey().startsWith(itemCode));
+
+            // Update category indices
+            updateCategoryIndices();
+
+            // Store updated data
+            storeDataToTextFile();
+        } else {
+            System.out.println("Item not found with Item Code: " + itemCode);
+        }
+    }
+
+    private void updateCategoryIndices() {
+        // Reset category indices
+        drinksCategoryIndex.clear();
+        foodCategoryIndex.clear();
+        merchandiseCategoryIndex.clear();
+
+        // Rebuild category indices based on remaining items
+        for (ItemCharacteristics item : Items) {
+            if (item instanceof Drink) {
+                updateCategoryIndex(drinksCategoryIndex, item.getCategory());
+            } else if (item instanceof Food) {
+                updateCategoryIndex(foodCategoryIndex, item.getCategory());
+            } else if (item instanceof Merchandise) {
+                updateCategoryIndex(merchandiseCategoryIndex, item.getCategory());
+            }
+        }
+    }
+
+    private void updateCategoryIndex(Map<String, Integer> categoryIndex, String category) {
+        if (categoryIndex.containsKey(category)) {
+            categoryIndex.put(category, categoryIndex.get(category) + 1);
+        } else {
+            categoryIndex.put(category, 1);
+        }
+    }
+
+    // Utility method for addItem()
+    private Map<String, Float> addSizes(int sizeChoice) {
+        Map<String, Float> sizesAndPricesMap = new HashMap<>();
+
+        while (sizeChoice == 1) {
+            System.out.println("Input size: ");
+            String sizeName = scanner.nextLine();
+            System.out.println("Input price: ");
+            float price = scanner.nextFloat();
+            scanner.nextLine();
+
+            sizesAndPricesMap.put(sizeName, price);
+            System.out.println("Add another size? ");
+            System.out.println("(1) Yes");
+            System.out.println("(2) No");
+            sizeChoice = getValidInput(1, 2);
+        }
+
+        if (sizeChoice == 2) {
+            System.out.println("Input price: ");
+            float price = scanner.nextFloat();
+            scanner.nextLine();
+            sizesAndPricesMap.put("NS", price);
+        }
+
+        return sizesAndPricesMap;
+    }
+
+    // Utility method for addItem()
+    private String generateItemCode(int itemTypeChoice, String category, String itemName) {
+        category = category.toUpperCase();
+        String categoryFirstLetter = String.valueOf(category.charAt(0));
+        String categoryLastLetter = String.valueOf(category.charAt(category.length() - 1));
+
+        itemName = itemName.toUpperCase();
+
+        return categoryFirstLetter + categoryLastLetter + "-" + itemName.substring(0, 4) + "-" + getItemCodeIndex(itemTypeChoice, category);
+    }
+
+    private String getItemCodeIndex (int itemTypeChoice, String category) {
+        String itemCodeIndex = "";
+        switch (itemTypeChoice) {
+            case 1:
+                if (drinksCategoryIndex.containsKey(category)) {
+                    itemCodeIndex = String.format("%03d", drinksCategoryIndex.get(category)); // get the index with the format of 3 digits
+                    drinksCategoryIndex.put(category, drinksCategoryIndex.get(category) + 1); // increment the index
+
+                }
+                else {
+                    drinksCategoryIndex.put(category, 1);
+                }
+                break;
+
+            case 2:
+                if (foodCategoryIndex.containsKey(category)) {
+                    itemCodeIndex = String.format("%03d", foodCategoryIndex.get(category));
+                    foodCategoryIndex.put(category, foodCategoryIndex.get(category) + 1);
+                }
+                else {
+                    foodCategoryIndex.put(category, 1);
+                }
+                break;
+            case 3:
+                if (merchandiseCategoryIndex.containsKey(category)) {
+                    itemCodeIndex = String.format("%03d", merchandiseCategoryIndex.get(category));
+                    merchandiseCategoryIndex.put(category, merchandiseCategoryIndex.get(category) + 1);
+                }
+                else {
+                    merchandiseCategoryIndex.put(category, 1);
+                }
+                break;
+        }
+
+        return itemCodeIndex;
     }
 
     // Utility method for input validation
