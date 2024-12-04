@@ -126,6 +126,29 @@ public class CashierMainMenu {
         int choice = getValidInput(1, index);
         ItemCharacteristics chosenItem = categoryItems.get(choice - 1);
 
+       // Unsure with the implementation of getting sizes so left it blank
+
+       // Handle Customizations
+        List<String> customizations = new ArrayList<>();
+        if (!chosenItem.getCustomizations().isEmpty()) {
+            System.out.println("Select customizations (type 'done' to finish):");
+            while (true) {
+                index = 1;
+                for (String customization : chosenItem.getCustomizations()) {
+                    System.out.println("(" + index + ") " + customization);
+                    index++;
+                }
+                System.out.println("(0) Done");
+
+                int customizationChoice = getValidInput(0, chosenItem.getCustomizations().size());
+                if (customizationChoice == 0) {
+                    break; // User is done adding customizations
+                }
+                String selectedCustomization = chosenItem.getCustomizations().get(customizationChoice - 1).toString();
+                customizations.add(selectedCustomization);
+            }
+        }
+
         /*
         If item has only one size, don't proceed to select options and prices. Otherwise, proceed
         If item has no customization proceed to input how many quantity of that order.

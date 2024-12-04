@@ -59,6 +59,10 @@ public abstract class ItemCharacteristics {
         sizesAndPrices.remove(size);
     }
 
+    public Map<String, Map<String, Float>> getCustomizations(){
+        return null;
+    }
+
     public void displaySizesAndPrices() {
         System.out.println("Sizes and Prices:");
         for (Map.Entry<String, Float> entry : sizesAndPrices.entrySet()) {
