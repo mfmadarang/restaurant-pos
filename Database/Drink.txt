@@ -1,7 +1,22 @@
-ES-AMER-001,Americano,Drink,Drink
-Small:50.0,Medium:100.0,Large:150.0
-Add Sugar_White Sugar:15.0,Brown Sugar:10.0
+1-ESPRESSO-SAD,sadfs,Drink,Drink
+NS:5.0
 
-SS-COCA-001,Coca-Cola,Drink,Drink
-Medium:50.0,Large:100.0
+1-ESPRESSO-SAD,sadfs,Drink,Drink
+NS:5.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+Add Sugar_Add Brown Sugar:10.0,Add White Sugar:20.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+Add Sugar_Add Brown Sugar:10.0,Add White Sugar:20.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+Add Sugar_Add Brown Sugar:10.0,Add White Sugar:20.0
+
+SS-SPRI-002,Sprite,Drink,Drink
+Large:50.0
+Add Sugar_Add Brown Sugar:10.0,Add White Sugar:20.0
 
