@@ -1,13 +1,13 @@
 package Menu;
 
-import Items.Drink;
-import Items.ItemCharacteristics;
+import Items.*;
 
 import java.util.*;
 
 public class CashierMainMenu {
     private final Scanner scanner = new Scanner(System.in);
-    private List<String> orderSummary = new ArrayList<>();
+    private List<String> orderSummary = new ArrayList<>(); // not used
+    private Map<String, Order> orderSummaryMap = new HashMap<>();
 
     public void showCashierMenu(ArrayList<ItemCharacteristics> Items) {
         // Create new transaction
@@ -30,30 +30,44 @@ public class CashierMainMenu {
         // Loop to continue the transaction until the user decides to stop
         while (continueTransaction) {
             // Display current order summary
-            if (!orderSummary.isEmpty()) {
+            if (!orderSummaryMap.isEmpty()) {
                 System.out.println("\n--- Current Order Summary ---");
-                for (String order : orderSummary) {
+                float currentTransactionPrice = 0;
+                for (Order order : orderSummaryMap.values()) {
                     System.out.println(order);
+                    currentTransactionPrice += order.getTotalPrice();
                 }
+                System.out.println("Current Transaction Price: " + currentTransactionPrice);
             }
 
             // Select an Item Type
             System.out.println("\nSelect Item Type:");
-            System.out.println("(1) Drinks");
+            System.out.println("(1) Drink");
             System.out.println("(2) Food");
             System.out.println("(3) Merchandise");
-            System.out.println("(4) Cancel Transaction");
-            System.out.println("(5) Finish Order"); // least priority
+            System.out.println("(4) Complete Transaction");
+            System.out.println("(5) Cancel Transaction"); // least priority
 
             int choice = getValidInput(1, 4);
 
             switch (choice) {
-                case 1 -> selectDrink();
-                case 2 -> selectFood();
-                case 3 -> selectMerchandise();
+                case 1 -> selectItemType(Items, "Drink");
+                case 2 -> selectItemType(Items, "Food");
+                case 3 -> selectItemType(Items, "Merchandise");
                 case 4 -> {
+                    System.out.println("\n--- Final Order Summary ---");
+                    float transactionPrice = 0;
+                    for (Order order : orderSummaryMap.values()) {
+                        System.out.println(order);
+                        transactionPrice += order.getTotalPrice();
+                    }
+                    System.out.println("Total Transaction Price: " + transactionPrice);
+                    System.out.println("Transaction complete.");
+                    return;
+                }
+                case 5 -> {
                     System.out.println("Transaction cancelled by user. Return to Cashier Main Menu");
-                    orderSummary.clear();
+                    orderSummaryMap.clear();
                     showCashierMenu(Items);
                 }
             }
@@ -74,28 +88,32 @@ public class CashierMainMenu {
         }
     }
 
-    /**
-     * Methods suggestions for efficient implementation of Cashier Main Menu
-     *
-     * @param Items
-     */
-
-    private void selectDrinkAlternative(ArrayList<ItemCharacteristics> Items) {
-        ArrayList<ItemCharacteristics> DrinkList = new ArrayList<>();
+    private void selectItemType(ArrayList<ItemCharacteristics> Items, String itemType) {
+        ArrayList<ItemCharacteristics> List = new ArrayList<>();
         Set<String> categorySet = new HashSet<>();
 
         for (ItemCharacteristics item : Items) {
-            if (item instanceof Drink) {
-                DrinkList.add(item);
+            if (item instanceof Drink && itemType.equals("Drink")) {
+                List.add(item);
+                String category = item.getCategory();
+                categorySet.add(category);
             }
-
-            String category = item.getCategory();
-            categorySet.add(category);
+            else if (item instanceof Food && itemType.equals("Food")) {
+                List.add(item);
+                String category = item.getCategory();
+                categorySet.add(category);
+            }
+            else if (item instanceof Merchandise && itemType.equals("Merchandise")) {
+                List.add(item);
+                String category = item.getCategory();
+                categorySet.add(category);
+            }
 
         }
 
         List<String> uniqueCategoryList = new ArrayList<>(categorySet);
-        System.out.println("Select Drink Category:");
+
+        System.out.println("Select " + itemType + " Category:");
         int index = 1;
         for (String category : uniqueCategoryList) {
             System.out.println("(" + index + ") " + category);
@@ -106,7 +124,7 @@ public class CashierMainMenu {
         String chosenCategory = uniqueCategoryList.get(choice - 1);
         ArrayList<ItemCharacteristics> categoryItems = new ArrayList<>();
 
-        for (ItemCharacteristics item : DrinkList) {
+        for (ItemCharacteristics item : List) {
             if(item.getCategory().equals(chosenCategory)) {
                 categoryItems.add(item);
             }
@@ -126,29 +144,119 @@ public class CashierMainMenu {
         int choice = getValidInput(1, index);
         ItemCharacteristics chosenItem = categoryItems.get(choice - 1);
 
-        /*
-        If item has only one size, don't proceed to select options and prices. Otherwise, proceed
-        If item has no customization proceed to input how many quantity of that order.
-        If item has customizations, list down the menu of customizations,
-        Nest the customizations under customizations, give condition "done" to end
-        Add the item to order summary array list
-        Ask the user if it wants to order
-        If yes return to CashierMain Menu
-           if no print the final summary order
+        String chosenSize = selectSizes(chosenItem.getSizesAndPrices());
+        float basePrice = chosenItem.getSizesAndPrices().get(chosenSize);
 
-         Note to self: similar to the selectItem method but has nested customizations and sizes.
+        Map<String, String> selectedCustomizations = new HashMap<>();
+        if (chosenItem instanceof Drink drinkItem) {
+            selectedCustomizations = selectCustomizations(drinkItem.getCustomizations());
+        } else if (chosenItem instanceof Food foodItem) {
+            selectedCustomizations = selectCustomizations(foodItem.getCustomizations());
+        }
 
-         */
-        /*
+        float totalPrice = basePrice;
+        for(String option : selectedCustomizations.values()) {
+            totalPrice += Float.parseFloat(option.split(":")[1]);
+        }
 
-         */
+        int quantity = getValidQuantityInput();
 
+        Order newOrder = new Order(chosenItem.getName(), chosenSize, selectedCustomizations, quantity, totalPrice);
+        String orderKey = newOrder.generateOrderKey();
 
-        // Next step is select size and the next one is select customizations if any
-
-        // implement logic for the chosenItem
+        if (orderSummaryMap.containsKey(orderKey)) {
+            Order order = orderSummaryMap.get(orderKey);
+            order.increaseQuantity(quantity);
+            System.out.println("Added to existing order.");
+        }
+        else {
+            orderSummaryMap.put(orderKey, newOrder);
+            System.out.println("Added a new order.");
+        }
 
     }
+
+    private String selectSizes(Map<String, Float> sizesAndPrices) {
+        System.out.println("Available sizes: ");
+        List<String> sizeOptions = new ArrayList<>(sizesAndPrices.keySet());
+        for(int i = 0; i < sizeOptions.size(); i++) {
+            System.out.println("(" + (i + 1) + ") " + sizeOptions.get(i) + " - " + sizesAndPrices.get(sizeOptions.get(i)));
+        }
+
+        int sizeChoice = getValidInput(1, sizeOptions.size());
+        String chosenSize = sizeOptions.get(sizeChoice - 1);
+
+        return chosenSize;
+    }
+
+    private Map<String, String> selectCustomizations(Map<String, Map<String, Float>> customizations) {
+        Map<String, String> selectedCustomizations = new HashMap<>();
+
+        while(!customizations.isEmpty()) {
+            System.out.println("Select a customization: ");
+            List<String> customizationOptions = new ArrayList<>(customizations.keySet());
+            for(int i = 0; i < customizationOptions.size(); i++) {
+                System.out.println("(" + (i + 1) + ") " + customizationOptions.get(i));
+            }
+            System.out.println("(" + (customizationOptions.size() + 1) + ") Done");
+            int choice = getValidInput(1, customizationOptions.size() + 1);
+
+            if (choice == customizationOptions.size() + 1) { break; }
+
+            String customization = customizationOptions.get(choice - 1);
+            Map<String, Float> options = customizations.get(customization);
+
+            System.out.println("Select an option for " + customization + ":");
+            List<String> optionList = new ArrayList<>(options.keySet());
+            for (int i = 0; i < optionList.size(); i++) {
+                System.out.println("(" + (i + 1) + ") " + optionList.get(i) + " : " + options.get(optionList.get(i)));
+            }
+
+            int optionChoice = getValidInput(1, optionList.size());
+            String selectedOption = optionList.get(optionChoice - 1) + ":" + options.get(optionList.get(optionChoice - 1));
+            selectedCustomizations.put(customization, selectedOption);
+
+
+        }
+
+        return selectedCustomizations;
+    }
+
+    private int getValidInput(int min, int max) {
+        int choice;
+        while (true) {
+            try {
+                System.out.println("Select choice: ");
+                choice = Integer.parseInt(scanner.nextLine());
+                if (choice >= min && choice <= max) {
+                    return choice;
+                }
+                System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.\n");
+            }
+        }
+    }
+
+    private int getValidQuantityInput() {
+        int choice;
+        while (true) {
+            try {
+                System.out.println("Select quantity: ");
+                choice = Integer.parseInt(scanner.nextLine());
+                return choice;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.\n");
+            }
+
+        }
+    }
+
+    //
+    //
+    // All methods below are not used
+    //
+    //
 
     private void selectDrink() {
         // Select a Category for Drinks
@@ -201,10 +309,6 @@ public class CashierMainMenu {
             case 3 -> selectMugs();
             case 4 -> System.out.println("Implement logic here for Others");
         }
-    }
-
-    private void selectOthers() {
-
     }
 
     private void selectExpressoItem() {
@@ -432,20 +536,7 @@ public class CashierMainMenu {
         selectItem("Mug", mugItems, mugPrices);
     }
 
-    private int getValidInput(int min, int max) {
-        int choice;
-        while (true) {
-            try {
-                choice = Integer.parseInt(scanner.nextLine());
-                if (choice >= min && choice <= max) {
-                    return choice;
-                }
-                System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-            }
-        }
-    }
+
 
     //With Customizations
     private void selectItem(String itemType, List<String> items, Map<String, Double> itemPrices,

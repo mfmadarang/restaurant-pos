@@ -14,37 +14,6 @@ public class PointOfSale {
         pos.fetchDataFromTextFile();
         //pos.showMainMenu();
 
-        for(ItemCharacteristics item: pos.Items) {
-            System.out.println(item.getItemCode());
-            System.out.println(item.getName());
-            System.out.println(item.getCategory());
-            item.displaySizesAndPrices();
-
-            if (item instanceof Drink) {
-                System.out.println(((Drink) item).getCustomizations());
-            }
-            else if (item instanceof Food) {
-                System.out.println(((Food) item).getCustomizations());
-            }
-
-            System.out.println();
-        }
-
-        Map<String, Float> sizesAndPricesMap = new HashMap<>();
-        sizesAndPricesMap.put("Large", 50F);
-
-        Map<String, Map<String,Float>> customizations = new HashMap<>();
-        Map<String, Float> optionsAndPrices = new HashMap<>();
-        optionsAndPrices.put("Add Brown Sugar", 10F);
-        optionsAndPrices.put("Add White Sugar", 20F);
-        customizations.put("Add Sugar", optionsAndPrices);
-
-        pos.Items.add(new Drink("SS-SPRI-002", "Sprite", "Drink", sizesAndPricesMap, "Soft Drinks", customizations));
-
-        pos.storeDataToTextFile();
-
-        //pos.showMainMenu();
-
     }
 
     ArrayList<ItemCharacteristics> Items = new ArrayList<>();
