@@ -25,34 +25,54 @@ public class CashierMainMenu {
     }
 
     private void startTransaction(ArrayList<ItemCharacteristics> Items) {
-        // Display current order summary
-        if (!orderSummary.isEmpty()) {
-            System.out.println("\n--- Current Order Summary ---");
-            for (String order : orderSummary) {
-                System.out.println(order);
-            }
-        }
+        boolean continueTransaction = true;  // Flag to control the continuation of the transaction
 
-        // Select an Item Type
-        System.out.println("\nSelect Item Type:");
-        System.out.println("(1) Drinks");
-        System.out.println("(2) Food");
-        System.out.println("(3) Merchandise");
-        System.out.println("(4) Cancel Transaction");
-
-        int choice = getValidInput(1, 4);
-
-        switch (choice) {
-            case 1 -> selectDrink();
-            case 2 -> selectFood();
-            case 3 -> selectMerchandise();
-            case 4 -> {
-                System.out.println("\n--- Final Order Summary ---");
+        // Loop to continue the transaction until the user decides to stop
+        while (continueTransaction) {
+            // Display current order summary
+            if (!orderSummary.isEmpty()) {
+                System.out.println("\n--- Current Order Summary ---");
                 for (String order : orderSummary) {
                     System.out.println(order);
                 }
-                System.out.println("Transaction canceled.");
-                orderSummary.clear(); // Clear the order summary after cancellation
+            }
+
+            // Select an Item Type
+            System.out.println("\nSelect Item Type:");
+            System.out.println("(1) Drinks");
+            System.out.println("(2) Food");
+            System.out.println("(3) Merchandise");
+            System.out.println("(4) Cancel Transaction");
+
+            int choice = getValidInput(1, 4);
+
+            switch (choice) {
+                case 1 -> selectDrink();
+                case 2 -> selectFood();
+                case 3 -> selectMerchandise();
+                case 4 -> {
+                    System.out.println("\n--- Final Order Summary ---");
+                    for (String order : orderSummary) {
+                        System.out.println(order);
+                    }
+                    System.out.println("Transaction canceled.");
+                    orderSummary.clear(); // Clear the order summary after cancellation
+                    continueTransaction = false;  // Stop the transaction if it's canceled
+                }
+            }
+
+            // Ask the user if they want to continue adding more items to the order
+            if (continueTransaction) {
+                System.out.println("\nDo you want to add another item? (yes/no)");
+                String continueResponse = scanner.nextLine().trim().toLowerCase();
+                if (continueResponse.equals("no")) {
+                    continueTransaction = false;  // Exit the loop if the user says "no"
+                    System.out.println("\n--- Final Order Summary ---");
+                    for (String order : orderSummary) {
+                        System.out.println(order);
+                    }
+                    System.out.println("Transaction complete.");
+                }
             }
         }
     }
@@ -350,78 +370,45 @@ public class CashierMainMenu {
     }
 
     private void selectTshirts() {
-        // Define T-shirt items and their prices
-        List<String> tShirtItems = new ArrayList<>();
-        tShirtItems.add("Graphic T-shirt");
-        tShirtItems.add("Plain White T-shirt");
-        tShirtItems.add("Vintage Logo T-shirt");
+        List<String> tshirtItems = new ArrayList<>();
+        tshirtItems.add("Basic T-Shirt");
+        tshirtItems.add("Graphic T-Shirt");
+        tshirtItems.add("Premium T-Shirt");
 
-        Map<String, Double> tShirtPrices = new HashMap<>();
-        tShirtPrices.put("Graphic T-shirt", 20.00);
-        tShirtPrices.put("Plain White T-shirt", 15.00);
-        tShirtPrices.put("Vintage Logo T-shirt", 25.00);
+        Map<String, Double> tshirtPrices = new HashMap<>();
+        tshirtPrices.put("Basic T-Shirt", 15.00);
+        tshirtPrices.put("Graphic T-Shirt", 20.00);
+        tshirtPrices.put("Premium T-Shirt", 25.00);
 
-        // Define customization options for T-shirts (e.g., add a print, change size)
-        List<String> tShirtCustomizations = new ArrayList<>();
-        tShirtCustomizations.add("Add Custom Print");
-        tShirtCustomizations.add("Change Size (S, M, L, XL)");
-
-        Map<String, Double> tShirtCustomizationPrices = new HashMap<>();
-        tShirtCustomizationPrices.put("Add Custom Print", 5.00);
-        tShirtCustomizationPrices.put("Change Size (S, M, L, XL)", 3.00);
-
-        // Call the generic selectItem method to handle the T-shirt item selection and customization
-        selectItem("T-shirt", tShirtItems, tShirtPrices, tShirtCustomizations, tShirtCustomizationPrices);
+        selectItem("T-Shirt", tshirtItems, tshirtPrices);
     }
 
     private void selectBags() {
-        // Define Bag items and their prices
         List<String> bagItems = new ArrayList<>();
-        bagItems.add("Canvas Tote Bag");
-        bagItems.add("Leather Backpack");
-        bagItems.add("Crossbody Purse");
+        bagItems.add("Backpack");
+        bagItems.add("Tote Bag");
+        bagItems.add("Messenger Bag");
 
         Map<String, Double> bagPrices = new HashMap<>();
-        bagPrices.put("Canvas Tote Bag", 15.00);
-        bagPrices.put("Leather Backpack", 50.00);
-        bagPrices.put("Crossbody Purse", 30.00);
+        bagPrices.put("Backpack", 30.00);
+        bagPrices.put("Tote Bag", 25.00);
+        bagPrices.put("Messenger Bag", 35.00);
 
-        //Customizations
-        List<String> bagCustomizations = new ArrayList<>();
-        bagCustomizations.add("Add Monogramming");
-        bagCustomizations.add("Choose Color");
-
-        Map<String, Double> bagCustomizationPrices = new HashMap<>();
-        bagCustomizationPrices.put("Add Monogramming", 8.00);
-        bagCustomizationPrices.put("Choose Color", 5.00);
-
-        // Call the generic selectItem method to handle the bag item selection and customization
-        selectItem("Bag", bagItems, bagPrices, bagCustomizations, bagCustomizationPrices);
+        selectItem("Bag", bagItems, bagPrices);
     }
 
     private void selectMugs() {
-        // Define Mug items and their prices
         List<String> mugItems = new ArrayList<>();
-        mugItems.add("Ceramic Coffee Mug");
+        mugItems.add("Ceramic Mug");
         mugItems.add("Travel Mug");
-        mugItems.add("Espresso Cup");
+        mugItems.add("Coffee Cup");
 
         Map<String, Double> mugPrices = new HashMap<>();
-        mugPrices.put("Ceramic Coffee Mug", 10.00);
-        mugPrices.put("Travel Mug", 12.00);
-        mugPrices.put("Espresso Cup", 8.00);
+        mugPrices.put("Ceramic Mug", 10.00);
+        mugPrices.put("Travel Mug", 15.00);
+        mugPrices.put("Coffee Cup", 12.00);
 
-        // Define customization options for Mugs (e.g., add engraving, choose color)
-        List<String> mugCustomizations = new ArrayList<>();
-        mugCustomizations.add("Custom Engraving");
-        mugCustomizations.add("Choose Color");
-
-        Map<String, Double> mugCustomizationPrices = new HashMap<>();
-        mugCustomizationPrices.put("Custom Engraving", 5.00);
-        mugCustomizationPrices.put("Choose Color", 3.00);
-
-        // Call the generic selectItem method to handle the mug item selection and customization
-        selectItem("Mug", mugItems, mugPrices, mugCustomizations, mugCustomizationPrices);
+        selectItem("Mug", mugItems, mugPrices);
     }
 
     private int getValidInput(int min, int max) {
@@ -439,6 +426,7 @@ public class CashierMainMenu {
         }
     }
 
+    //With Customizations
     private void selectItem(String itemType, List<String> items, Map<String, Double> itemPrices,
                             List<String> customizations, Map<String, Double> customizationPrices) {
         System.out.println("Select a " + itemType + ":");
@@ -451,7 +439,7 @@ public class CashierMainMenu {
 
         if (choice == items.size() + 1) {
             System.out.println("Canceled " + itemType + " selection.");
-            return;
+            return; // Exit the selection method if canceled
         }
 
         String selectedItem = items.get(choice - 1);
@@ -475,7 +463,7 @@ public class CashierMainMenu {
                 int customizationChoice = getValidInput(1, customizations.size() + 1);
 
                 if (customizationChoice == customizations.size() + 1) {
-                    break;
+                    break; // Stop customization if done
                 }
 
                 String selectedCustomization = customizations.get(customizationChoice - 1);
@@ -505,19 +493,47 @@ public class CashierMainMenu {
             System.out.println(order);
         }
 
-        System.out.println("\nDo you want to continue the transaction? (Yes/No):");
-        String continueResponse = scanner.nextLine().trim().toLowerCase();
-
-        if (continueResponse.equals("yes")) {
-            startTransaction(); // Go back to the main transaction method
-        } else {
-            System.out.println("\n--- Final Order Summary ---");
-            for (String order : orderSummary) {
-                System.out.println(order);
-            }
-            System.out.println("Thank you for your order!");
-            orderSummary.clear();
-        }
+        return;
     }
+
+    //Without Customizations - Used method overloading
+    private void selectItem(String itemType, List<String> items, Map<String, Double> itemPrices) {
+        System.out.println("Select a " + itemType + ":");
+        for (int i = 0; i < items.size(); i++) {
+            System.out.printf("(%d) %s $%.2f%n", (i + 1), items.get(i), itemPrices.get(items.get(i)));
+        }
+        System.out.println("(" + (items.size() + 1) + ") Cancel");
+
+        int choice = getValidInput(1, items.size() + 1);
+
+        if (choice == items.size() + 1) {
+            System.out.println("Canceled " + itemType + " selection.");
+            return; // Exit the selection method if canceled
+        }
+
+        String selectedItem = items.get(choice - 1);
+        System.out.println("You selected: " + selectedItem);
+
+        // No customization options, proceed to quantity
+        System.out.println("Enter the quantity for " + selectedItem + ":");
+        int quantity = getValidInput(1, 10); // Limit quantity to 10 for simplicity
+
+        // Total price calculation
+        double itemPrice = itemPrices.get(selectedItem);
+        double totalItemPrice = itemPrice * quantity;
+
+        // Add the selected item to the order summary
+        String orderDetails = selectedItem + " x" + quantity + " - ₱" + totalItemPrice;
+        orderSummary.add(orderDetails);
+
+        // Current order summary
+        System.out.println("\n--- Current Order Summary ---");
+        for (String order : orderSummary) {
+            System.out.println(order);
+        }
+
+        return;
+    }
+
 
 }
