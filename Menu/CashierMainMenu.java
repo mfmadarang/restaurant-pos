@@ -43,6 +43,7 @@ public class CashierMainMenu {
             System.out.println("(2) Food");
             System.out.println("(3) Merchandise");
             System.out.println("(4) Cancel Transaction");
+            System.out.println("(5) Finish Order"); // least priority
 
             int choice = getValidInput(1, 4);
 
@@ -51,13 +52,9 @@ public class CashierMainMenu {
                 case 2 -> selectFood();
                 case 3 -> selectMerchandise();
                 case 4 -> {
-                    System.out.println("\n--- Final Order Summary ---");
-                    for (String order : orderSummary) {
-                        System.out.println(order);
-                    }
-                    System.out.println("Transaction canceled.");
-                    orderSummary.clear(); // Clear the order summary after cancellation
-                    continueTransaction = false;  // Stop the transaction if it's canceled
+                    System.out.println("Transaction cancelled by user. Return to Cashier Main Menu");
+                    orderSummary.clear();
+                    showCashierMenu(Items);
                 }
             }
 
@@ -129,6 +126,26 @@ public class CashierMainMenu {
         int choice = getValidInput(1, index);
         ItemCharacteristics chosenItem = categoryItems.get(choice - 1);
 
+        /*
+        If item has only one size, don't proceed to select options and prices. Otherwise, proceed
+        If item has no customization proceed to input how many quantity of that order.
+        If item has customizations, list down the menu of customizations,
+        Nest the customizations under customizations, give condition "done" to end
+        Add the item to order summary array list
+        Ask the user if it wants to order
+        If yes return to CashierMain Menu
+           if no print the final summary order
+
+         Note to self: similar to the selectItem method but has nested customizations and sizes.
+
+         */
+        /*
+
+         */
+
+
+        // Next step is select size and the next one is select customizations if any
+
         // implement logic for the chosenItem
 
     }
@@ -184,6 +201,10 @@ public class CashierMainMenu {
             case 3 -> selectMugs();
             case 4 -> System.out.println("Implement logic here for Others");
         }
+    }
+
+    private void selectOthers() {
+
     }
 
     private void selectExpressoItem() {
