@@ -65,4 +65,6 @@ public abstract class ItemCharacteristics {
             System.out.println("Size: " + entry.getKey() + ", Price: " + entry.getValue());
         }
     }
+
+
 }
