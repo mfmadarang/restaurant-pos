@@ -245,31 +245,42 @@ public class PointOfSale {
 
     // Main Menu for user role selection
     public void showMainMenu() {
-        while(true) {
-            System.out.println("Select User:");
-            System.out.println("(1) Cashier");
-            System.out.println("(2) Manager");
-            System.out.println("(3) Quit");
+        while (true) {
+            System.out.println("""
+        ===========================================
+                     HELL WEEK COFFEE
+        ===========================================
+        Select the type of user:
+        
+        (1) Cashier   - Access the Cashier Menu
+        (2) Manager   - Access the Manager Menu
+        (3) Quit      - Exit the System
+        
+        ===========================================
+        Please enter your choice (1-3):
+        """);
 
             int choice = getValidInput(1, 3);
 
             switch (choice) {
                 case 1 -> {
+                    System.out.println("\nOpening Cashier Menu...");
                     CashierMainMenu cashierMainMenu = new CashierMainMenu();
                     cashierMainMenu.showCashierMenu(Items);
                 }
                 case 2 -> {
+                    System.out.println("\nOpening Manager Menu...");
                     ManagerMainMenu managerMainMenu = new ManagerMainMenu(this);
                     managerMainMenu.showManagerMenu();
                 }
                 case 3 -> {
-                    System.out.println("Exiting the system. Goodbye!");
+                    System.out.println("\nThank you for using the system. Goodbye!");
                     return;
                 }
             }
         }
-
     }
+
 
     // Utility method for input validation
     private int getValidInput(int min, int max) {

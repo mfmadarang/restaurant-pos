@@ -20,13 +20,21 @@ public class ManagerMainMenu {
 
     public void showManagerMenu() {
         while (true) {
-            System.out.println("Welcome, Manager!");
-            System.out.println("Select option:");
-            System.out.println("(1) Add Item");
-            System.out.println("(2) Modify Item");
-            System.out.println("(3) Remove Item");
-            System.out.println("(4) Import Items from File");
-            System.out.println("(5) Logout");
+            System.out.println("""
+        ===========================================
+                     MANAGER MENU
+        ===========================================
+        Welcome, Manager! Please select an option:
+        
+        (1) Add Item              - Add a new item to the inventory
+        (2) Modify Item           - Edit an existing item's details
+        (3) Remove Item           - Delete an item from the inventory
+        (4) Import Items from File - Upload items from an external file
+        (5) Logout                - Exit to the Main Menu
+        
+        ===========================================
+        Enter your choice (1-5):
+        """);
 
             int choice = getValidInput(1, 5);
 
@@ -36,7 +44,7 @@ public class ManagerMainMenu {
                 case 3 -> removeItem();
                 case 4 -> importItemsFromFile();
                 case 5 -> {
-                    System.out.println("Logging out...");
+                    System.out.println("\nLogging out... Returning to the Main Menu.");
                     return;
                 }
             }
@@ -44,7 +52,13 @@ public class ManagerMainMenu {
     }
 
     public void importItemsFromFile() {
-        System.out.println("Enter the path to the file to import:");
+        System.out.println("""
+    ===========================================
+                  IMPORT ITEMS
+    ===========================================
+    Enter the path to the file you wish to import:
+    """);
+
         String filePath = scanner.nextLine();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -62,13 +76,25 @@ public class ManagerMainMenu {
                 }
             }
 
-            System.out.println("Import completed.");
-            System.out.println("Successfully imported: " + successCount + " items");
-            System.out.println("Failed to import: " + errorCount + " items");
+            System.out.println("""
+        ===========================================
+                  IMPORT SUMMARY
+        ===========================================
+        Import completed.
+        Successfully imported: %d items
+        Failed to import: %d items
+        ===========================================
+        """.formatted(successCount, errorCount));
 
             pointOfSale.storeDataToTextFile();
         } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
+            System.out.println("""
+        ===========================================
+                  IMPORT ERROR
+        ===========================================
+        Error reading file: %s
+        ===========================================
+        """.formatted(e.getMessage()));
         }
     }
 
@@ -153,57 +179,95 @@ public class ManagerMainMenu {
     }
 
     public void addItem() {
-        System.out.println("Select Item Type: ");
-        System.out.println("(1) Drinks");
-        System.out.println("(2) Food");
-        System.out.println("(3) Merchandise");
+        System.out.println("""
+    ===========================================
+                    ADD NEW ITEM
+    ===========================================
+    Select the type of item to add:
+    
+    (1) Drinks        - Add a drink to the inventory
+    (2) Food          - Add a food item to the inventory
+    (3) Merchandise   - Add merchandise to the inventory
+    ===========================================
+    Enter your choice (1-3):
+    """);
 
         int itemTypeChoice = getValidInput(1, 3);
 
-        System.out.println("Input Item Name: ");
+        System.out.println("""
+    ===========================================
+                ITEM DETAILS
+    ===========================================
+    Enter the name of the item:
+    """);
         String itemName = scanner.nextLine();
 
-        System.out.println("Add different Sizes? ");
-        System.out.println("(1) Yes");
-        System.out.println("(2) No");
+        System.out.println("""
+    ===========================================
+               SIZE OPTIONS
+    ===========================================
+    Would you like to add different sizes?
+
+    (1) Yes
+    (2) No
+    ===========================================
+    Enter your choice (1-2):
+    """);
         int sizeChoice = getValidInput(1, 2);
 
         Map<String, Float> sizesAndPricesMap = addSizes(sizeChoice);
 
-        System.out.println("Enter Category: ");
+        System.out.println("""
+    ===========================================
+                CATEGORY DETAILS
+    ===========================================
+    Enter the category of the item:
+    """);
         String category = scanner.nextLine();
 
         String itemCode = generateItemCode(itemTypeChoice, category, itemName);
 
-        // Add customizations for Drinks and Food
         Map<String, Map<String, Float>> customizations = null;
-        if (itemTypeChoice != 3) { // Not Merchandise
+        if (itemTypeChoice != 3) { // Add customizations for Drinks and Food
             customizations = addCustomizations(itemTypeChoice);
         }
 
-        // Create the item based on type
+        System.out.println("""
+    ===========================================
+                ADDING ITEM
+    ===========================================
+    """);
+
         switch (itemTypeChoice) {
             case 1 -> {
                 Drink newDrink = new Drink(itemCode, itemName, "Drink", sizesAndPricesMap, category, customizations);
                 pointOfSale.Items.add(newDrink);
-
-                System.out.println("Drink added successfully with Item Code: " + itemCode);
+                System.out.println("Drink added successfully! Item Code: " + itemCode);
             }
             case 2 -> {
                 Food newFood = new Food(itemCode, itemName, "Food", sizesAndPricesMap, category, customizations);
                 pointOfSale.Items.add(newFood);
-                System.out.println("Food item added successfully with Item Code: " + itemCode);
+                System.out.println("Food item added successfully! Item Code: " + itemCode);
             }
             case 3 -> {
                 Merchandise newMerchandise = new Merchandise(itemCode, itemName, "Merchandise", sizesAndPricesMap, category);
                 pointOfSale.Items.add(newMerchandise);
-                System.out.println("Merchandise added successfully with Item Code: " + itemCode);
+                System.out.println("Merchandise added successfully! Item Code: " + itemCode);
             }
         }
+
+        System.out.println("""
+    ===========================================
+            ITEM SUCCESSFULLY ADDED
+    ===========================================
+    Item has been added to the inventory. The data has been saved.
+    ===========================================
+    """);
 
         // Store updated data
         pointOfSale.storeDataToTextFile();
     }
+
 
     private String generateItemCode(int itemTypeChoice, String category, String itemName) {
         return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.substring(0, 3).toUpperCase();
@@ -212,50 +276,105 @@ public class ManagerMainMenu {
 
 
     private Map<String, Map<String, Float>> addCustomizations(int itemTypeChoice) {
-        Map<String, Map<String, Float>> customizations = new HashMap<>();
+        System.out.println("""
+    ===========================================
+              ADD CUSTOMIZATIONS
+    ===========================================
+    Do you want to add customizations for this item?
+    
+    (1) Yes - Add custom options for the item
+    (2) No  - Skip customization options
+    ===========================================
+    Enter your choice (1-2):
+    """);
 
-        System.out.println("Do you want to add customizations?");
-        System.out.println("(1) Yes");
-        System.out.println("(2) No");
+        Map<String, Map<String, Float>> customizations = new HashMap<>();
         int customizationChoice = getValidInput(1, 2);
 
         while (customizationChoice == 1) {
-            System.out.println("Enter Customization Name:");
+            System.out.println("""
+        ===========================================
+               NEW CUSTOMIZATION
+        ===========================================
+        Enter the name of the customization:
+        """);
             String customizationName = scanner.nextLine();
 
             Map<String, Float> optionsAndPrices = new HashMap<>();
             int optionCount = 0;
+
             while (optionCount < 5) {
-                System.out.println("Enter Customization Option (or press Enter to finish):");
+                System.out.println("""
+            ===========================================
+                  ADD CUSTOMIZATION OPTION
+            ===========================================
+            Enter the name of the customization option 
+            (or press Enter to finish adding options):
+            """);
                 String optionName = scanner.nextLine();
+
                 if (optionName.isEmpty()) break;
 
-                System.out.println("Enter Price for " + optionName + ":");
+                System.out.printf("Enter the price for '%s':%n", optionName);
                 float optionPrice = scanner.nextFloat();
-                scanner.nextLine(); // consume newline
+                scanner.nextLine(); // Consume newline
 
                 optionsAndPrices.put(optionName, optionPrice);
                 optionCount++;
 
                 if (optionCount == 5) {
-                    System.out.println("Maximum number of options (5) reached.");
+                    System.out.println("""
+                ===========================================
+                Maximum number of options (5) reached.
+                ===========================================
+                """);
                     break;
                 }
             }
 
             customizations.put(customizationName, optionsAndPrices);
 
-            System.out.println("Do you want to add another customization?");
-            System.out.println("(1) Yes");
-            System.out.println("(2) No");
+            System.out.println("""
+        ===========================================
+          ADD ANOTHER CUSTOMIZATION?
+        ===========================================
+        Do you want to add another customization?
+        
+        (1) Yes - Add another customization
+        (2) No  - Finish adding customizations
+        ===========================================
+        Enter your choice (1-2):
+        """);
             customizationChoice = getValidInput(1, 2);
+        }
+
+        if (customizations.isEmpty()) {
+            System.out.println("""
+        ===========================================
+              NO CUSTOMIZATIONS ADDED
+        ===========================================
+        """);
+        } else {
+            System.out.println("""
+        ===========================================
+             CUSTOMIZATIONS COMPLETED
+        ===========================================
+        Customizations have been successfully added.
+        ===========================================
+        """);
         }
 
         return customizations.isEmpty() ? null : customizations;
     }
 
     private void modifyItem() {
-        System.out.println("Enter Item Code to Modify:");
+        System.out.println("""
+    ===========================================
+                  MODIFY ITEM
+    ===========================================
+    Enter the Item Code of the item you wish to modify:
+    """);
+
         String itemCode = scanner.nextLine();
 
         // Find the item with the given item code
@@ -268,25 +387,65 @@ public class ManagerMainMenu {
         }
 
         if (itemToModify == null) {
-            System.out.println("Item not found with Item Code: " + itemCode);
+            System.out.printf("""
+        ===========================================
+                  ITEM NOT FOUND
+        ===========================================
+        No item found with the Item Code: %s
+        ===========================================
+        """, itemCode);
             return;
         }
 
-        System.out.println("Select what to modify:");
-        System.out.println("(1) Sizes and Prices");
-        System.out.println("(2) Customizations");
-        System.out.println("(3) Cancel");
+        System.out.printf("""
+    ===========================================
+             MODIFYING ITEM CODE: %s
+    ===========================================
+    Select an option to modify:
+    
+    (1) Sizes and Prices  - Change size options and prices
+    (2) Customizations    - Adjust customizations
+    (3) Cancel            - Return to the previous menu
+    ===========================================
+    Enter your choice (1-3):
+    """, itemCode);
 
         int modifyChoice = getValidInput(1, 3);
 
         switch (modifyChoice) {
-            case 1 -> modifySizesAndPrices(itemToModify);
-            case 2 -> modifyCustomizations(itemToModify);
+            case 1 -> {
+                System.out.println("""
+            ===========================================
+              MODIFYING SIZES AND PRICES
+            ===========================================
+            """);
+                modifySizesAndPrices(itemToModify);
+            }
+            case 2 -> {
+                System.out.println("""
+            ===========================================
+              MODIFYING CUSTOMIZATIONS
+            ===========================================
+            """);
+                modifyCustomizations(itemToModify);
+            }
             case 3 -> {
-                System.out.println("Modification canceled.");
+                System.out.println("""
+            ===========================================
+                MODIFICATION CANCELED
+            ===========================================
+            """);
                 return;
             }
         }
+
+        System.out.println("""
+    ===========================================
+             MODIFICATION SUCCESSFUL
+    ===========================================
+    The changes have been saved successfully.
+    ===========================================
+    """);
 
         // Store updated data
         pointOfSale.storeDataToTextFile();
