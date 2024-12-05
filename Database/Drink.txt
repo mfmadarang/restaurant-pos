@@ -1,1 +1,9 @@
+1-ESPRESSO-AME,Americano,Drink,Espresso
+Medium:50.0,Large:75.0
+Add Milk_Soy Milk:20.0,Oat Milk:20.0
+
+1-COLD DRINKS-CRU,Crushed Strawberry Shake,Drink,Cold Drinks
+Medium:50.0,Large:100.0
+Add Extra Sugar_75% Sugar:10.0,25% Sugar:10.0,50% Sugar:10.0
+Add Toppings_Kiwi:15.0,Strawberry:15.0
 

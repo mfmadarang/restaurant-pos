@@ -209,6 +209,8 @@ public class ManagerMainMenu {
         return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.substring(0, 3).toUpperCase();
     }
 
+
+
     private Map<String, Map<String, Float>> addCustomizations(int itemTypeChoice) {
         Map<String, Map<String, Float>> customizations = new HashMap<>();
 

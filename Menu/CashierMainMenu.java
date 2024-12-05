@@ -11,24 +11,29 @@ public class CashierMainMenu {
 
     public void showCashierMenu(ArrayList<ItemCharacteristics> Items) {
         // Create new transaction
-        System.out.println("Welcome, Cashier!");
-        System.out.println("Select option:");
-        System.out.println("(1) Place Order");
-        System.out.println("(2) Logout");
+        while (true) {
+            System.out.println("Welcome, Cashier!");
+            System.out.println("Select option:");
+            System.out.println("(1) Place Order");
+            System.out.println("(2) Logout");
 
-        int choice = getValidInput(1, 2);
+            int choice = getValidInput(1, 2);
 
-        switch (choice) {
-            case 1 -> startTransaction(Items);
-            case 2 -> System.out.println("Logging out...");
+            switch (choice) {
+                case 1 -> startTransaction(Items);
+                case 2 -> {
+                    System.out.println("Logging out...");
+                    return;
+                }
+            }
         }
+
     }
 
     private void startTransaction(ArrayList<ItemCharacteristics> Items) {
         boolean continueTransaction = true;  // Flag to control the continuation of the transaction
 
-        // Loop to continue the transaction until the user decides to stop
-        while (continueTransaction) {
+        while(true) {
             // Display current order summary
             if (!orderSummaryMap.isEmpty()) {
                 System.out.println("\n--- Current Order Summary ---");
@@ -48,7 +53,7 @@ public class CashierMainMenu {
             System.out.println("(4) Complete Transaction");
             System.out.println("(5) Cancel Transaction"); // least priority
 
-            int choice = getValidInput(1, 4);
+            int choice = getValidInput(1, 5);
 
             switch (choice) {
                 case 1 -> selectItemType(Items, "Drink");
@@ -62,27 +67,13 @@ public class CashierMainMenu {
                         transactionPrice += order.getTotalPrice();
                     }
                     System.out.println("Total Transaction Price: " + transactionPrice);
-                    System.out.println("Transaction complete.");
+                    System.out.println("Transaction complete.\n");
                     return;
                 }
                 case 5 -> {
-                    System.out.println("Transaction cancelled by user. Return to Cashier Main Menu");
+                    System.out.println("Transaction cancelled by user. Return to Cashier Main Menu\n");
                     orderSummaryMap.clear();
-                    showCashierMenu(Items);
-                }
-            }
-
-            // Ask the user if they want to continue adding more items to the order
-            if (continueTransaction) {
-                System.out.println("\nDo you want to add another item? (yes/no)");
-                String continueResponse = scanner.nextLine().trim().toLowerCase();
-                if (continueResponse.equals("no")) {
-                    continueTransaction = false;  // Exit the loop if the user says "no"
-                    System.out.println("\n--- Final Order Summary ---");
-                    for (String order : orderSummary) {
-                        System.out.println(order);
-                    }
-                    System.out.println("Transaction complete.");
+                    return;
                 }
             }
         }
@@ -111,6 +102,11 @@ public class CashierMainMenu {
 
         }
 
+        if (List.isEmpty()) {
+            System.out.println("This item type has no available items. Returning to Select Item Type");
+            return;
+        }
+
         List<String> uniqueCategoryList = new ArrayList<>(categorySet);
 
         System.out.println("Select " + itemType + " Category:");
@@ -135,7 +131,12 @@ public class CashierMainMenu {
     }
 
     private void showCategoryItems(ArrayList<ItemCharacteristics> categoryItems, String itemType, String category) {
-        System.out.println("Select a" + itemType + " from " + category +" category:");
+        if (categoryItems.isEmpty()) {
+            System.out.println("This " + category + " category has no available items. Returning to Select Item Type");
+            return;
+        }
+
+        System.out.println("Select a " + itemType + " from " + category +" category:");
         int index = 1;
         for (ItemCharacteristics item : categoryItems) {
             System.out.println("(" + index + ") " + item.getName());
@@ -147,29 +148,32 @@ public class CashierMainMenu {
         String chosenSize = selectSizes(chosenItem.getSizesAndPrices());
         float basePrice = chosenItem.getSizesAndPrices().get(chosenSize);
 
-        Map<String, String> selectedCustomizations = new HashMap<>();
-        if (chosenItem instanceof Drink drinkItem) {
-            selectedCustomizations = selectCustomizations(drinkItem.getCustomizations());
-        } else if (chosenItem instanceof Food foodItem) {
-            selectedCustomizations = selectCustomizations(foodItem.getCustomizations());
+
+        Map<String, List<String>> selectedCustomizations = new HashMap<>();
+        if (chosenItem instanceof Drink) {
+            selectedCustomizations = selectCustomizations(((Drink) chosenItem).getCustomizations());
+        } else if (chosenItem instanceof Food) {
+            selectedCustomizations = selectCustomizations(((Food) chosenItem).getCustomizations());
         }
 
-        float totalPrice = basePrice;
-        for(String option : selectedCustomizations.values()) {
-            totalPrice += Float.parseFloat(option.split(":")[1]);
+        float customizationPrice = 0;
+        for (List<String> options : selectedCustomizations.values()) {
+            for (String option : options) {
+                customizationPrice += Float.parseFloat(option.split(":")[1]);
+            }
         }
 
         int quantity = getValidQuantityInput();
 
-        Order newOrder = new Order(chosenItem.getName(), chosenSize, selectedCustomizations, quantity, totalPrice);
+        Order newOrder = new Order(chosenItem.getName(), chosenSize, selectedCustomizations, quantity, (basePrice + customizationPrice) * quantity);
         String orderKey = newOrder.generateOrderKey();
 
         if (orderSummaryMap.containsKey(orderKey)) {
-            Order order = orderSummaryMap.get(orderKey);
-            order.increaseQuantity(quantity);
+            Order existingOrder = orderSummaryMap.get(orderKey);
+            existingOrder.increaseQuantity(quantity);
+            existingOrder.increasePrice(newOrder.getTotalPrice());
             System.out.println("Added to existing order.");
-        }
-        else {
+        } else {
             orderSummaryMap.put(orderKey, newOrder);
             System.out.println("Added a new order.");
         }
@@ -189,19 +193,27 @@ public class CashierMainMenu {
         return chosenSize;
     }
 
-    private Map<String, String> selectCustomizations(Map<String, Map<String, Float>> customizations) {
-        Map<String, String> selectedCustomizations = new HashMap<>();
+    private Map<String, List<String>> selectCustomizations(Map<String, Map<String, Float>> customizations) {
+        Map<String, List<String>> selectedCustomizations = new HashMap<>();
 
-        while(!customizations.isEmpty()) {
-            System.out.println("Select a customization: ");
+        if (customizations.isEmpty()) {
+            System.out.println("No customizations available.");
+            return selectedCustomizations;
+        }
+
+        while (true) {
+            System.out.println("Select a customization:");
             List<String> customizationOptions = new ArrayList<>(customizations.keySet());
-            for(int i = 0; i < customizationOptions.size(); i++) {
+
+            for (int i = 0; i < customizationOptions.size(); i++) {
                 System.out.println("(" + (i + 1) + ") " + customizationOptions.get(i));
             }
             System.out.println("(" + (customizationOptions.size() + 1) + ") Done");
-            int choice = getValidInput(1, customizationOptions.size() + 1);
 
-            if (choice == customizationOptions.size() + 1) { break; }
+            int choice = getValidInput(1, customizationOptions.size() + 1);
+            if (choice == customizationOptions.size() + 1) {
+                break;
+            }
 
             String customization = customizationOptions.get(choice - 1);
             Map<String, Float> options = customizations.get(customization);
@@ -214,9 +226,16 @@ public class CashierMainMenu {
 
             int optionChoice = getValidInput(1, optionList.size());
             String selectedOption = optionList.get(optionChoice - 1) + ":" + options.get(optionList.get(optionChoice - 1));
-            selectedCustomizations.put(customization, selectedOption);
 
+            System.out.println("Enter quantity for " + selectedOption.split(":")[0] + ":");
+            int quantity = getValidQuantityInput();
 
+            selectedCustomizations.putIfAbsent(customization, new ArrayList<>());
+            for (int i = 0; i < quantity; i++) {
+                selectedCustomizations.get(customization).add(selectedOption);
+            }
+
+            System.out.println(quantity + " instance(s) of " + selectedOption.split(":")[0] + " added.");
         }
 
         return selectedCustomizations;
