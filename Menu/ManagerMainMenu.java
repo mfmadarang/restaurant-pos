@@ -270,7 +270,11 @@ public class ManagerMainMenu {
 
 
     private String generateItemCode(int itemTypeChoice, String category, String itemName) {
-        return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.substring(0, 3).toUpperCase();
+        if (itemName.length() >= 3) {
+            return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.substring(0, 3).toUpperCase();
+        } else {
+            return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.toUpperCase();
+        }
     }
 
 
