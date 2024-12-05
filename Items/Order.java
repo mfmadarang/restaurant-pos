@@ -1,14 +1,16 @@
 package Items;
+
+import java.util.List;
 import java.util.Map;
 
 public class Order {
     private String itemName;
     private String size;
-    private Map<String, String> customizations; // Customization name to selected option and price
+    private Map<String, List<String>> customizations; // Customization name to list of selected options with prices
     private int quantity;
     private float totalPrice;
 
-    public Order(String itemName, String size, Map<String, String> customizations, int quantity, float totalPrice) {
+    public Order(String itemName, String size, Map<String, List<String>> customizations, int quantity, float totalPrice) {
         this.itemName = itemName;
         this.size = size;
         this.customizations = customizations;
@@ -24,7 +26,7 @@ public class Order {
         return size;
     }
 
-    public Map<String, String> getCustomizations() {
+    public Map<String, List<String>> getCustomizations() {
         return customizations;
     }
 
@@ -34,7 +36,6 @@ public class Order {
 
     public void increaseQuantity(int quantity) {
         this.quantity += quantity;
-
     }
 
     public float getTotalPrice() {
@@ -57,8 +58,9 @@ public class Order {
 
         // If there are customizations, add them to the key
         if (customizations != null && !customizations.isEmpty()) {
-            customizations.forEach((customizationName, customizationOption) -> {
-                keyBuilder.append("_").append(customizationName).append(":").append(customizationOption);
+            customizations.forEach((customizationName, options) -> {
+                keyBuilder.append("_").append(customizationName);
+                options.forEach(option -> keyBuilder.append(":").append(option));
             });
         }
 
@@ -69,7 +71,17 @@ public class Order {
     public String toString() {
         StringBuilder customizationsStr = new StringBuilder();
         if (customizations != null && !customizations.isEmpty()) {
-            customizations.forEach((key, value) -> customizationsStr.append("\n    - ").append(key).append(": ").append(value));
+            customizations.forEach((key, value) -> {
+                customizationsStr.append("\n    - ").append(key).append(": ");
+                for (String option : value) {
+                    String[] parts = option.split(":");
+                    customizationsStr.append(parts[0]).append(" (₱").append(parts[1]).append("), ");
+                }
+                // Remove trailing comma and space
+                if (customizationsStr.length() > 2) {
+                    customizationsStr.setLength(customizationsStr.length() - 2);
+                }
+            });
         } else {
             customizationsStr.append("None");
         }

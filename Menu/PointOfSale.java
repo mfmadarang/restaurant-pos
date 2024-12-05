@@ -113,15 +113,13 @@ public class PointOfSale {
     }
 
     private Map<String, Map<String, Float>> scanCustomizationsFromFile(BufferedReader reader) throws IOException {
-        Map<String, Map<String, Float>> customizationsMap = null;
+        Map<String, Map<String, Float>> customizationsMap = new HashMap<>();;
         String line = reader.readLine();
 
         while (line != null) {
             if (line.trim().isEmpty()) {
                 break;
             }
-
-            customizationsMap = new HashMap<>();
 
             String[] data = line.split("(?<!\\\\)_");
             String customizationName = data[0].replace("\\_", "_").replace("\\,", ",").replace("\\:", ":");

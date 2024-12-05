@@ -148,30 +148,32 @@ public class CashierMainMenu {
         String chosenSize = selectSizes(chosenItem.getSizesAndPrices());
         float basePrice = chosenItem.getSizesAndPrices().get(chosenSize);
 
-        Map<String, String> selectedCustomizations = new HashMap<>();
+
+        Map<String, List<String>> selectedCustomizations = new HashMap<>();
         if (chosenItem instanceof Drink) {
             selectedCustomizations = selectCustomizations(((Drink) chosenItem).getCustomizations());
         } else if (chosenItem instanceof Food) {
             selectedCustomizations = selectCustomizations(((Food) chosenItem).getCustomizations());
         }
 
-        float totalPrice = basePrice;
-        for(String option : selectedCustomizations.values()) {
-            totalPrice += Float.parseFloat(option.split(":")[1]);
+        float customizationPrice = 0;
+        for (List<String> options : selectedCustomizations.values()) {
+            for (String option : options) {
+                customizationPrice += Float.parseFloat(option.split(":")[1]);
+            }
         }
 
         int quantity = getValidQuantityInput();
 
-        Order newOrder = new Order(chosenItem.getName(), chosenSize, selectedCustomizations, quantity, totalPrice);
+        Order newOrder = new Order(chosenItem.getName(), chosenSize, selectedCustomizations, quantity, (basePrice + customizationPrice) * quantity);
         String orderKey = newOrder.generateOrderKey();
 
         if (orderSummaryMap.containsKey(orderKey)) {
-            Order order = orderSummaryMap.get(orderKey);
-            order.increaseQuantity(quantity);
-            order.increasePrice(newOrder.getTotalPrice());
+            Order existingOrder = orderSummaryMap.get(orderKey);
+            existingOrder.increaseQuantity(quantity);
+            existingOrder.increasePrice(newOrder.getTotalPrice());
             System.out.println("Added to existing order.");
-        }
-        else {
+        } else {
             orderSummaryMap.put(orderKey, newOrder);
             System.out.println("Added a new order.");
         }
@@ -191,19 +193,27 @@ public class CashierMainMenu {
         return chosenSize;
     }
 
-    private Map<String, String> selectCustomizations(Map<String, Map<String, Float>> customizations) {
-        Map<String, String> selectedCustomizations = new HashMap<>();
+    private Map<String, List<String>> selectCustomizations(Map<String, Map<String, Float>> customizations) {
+        Map<String, List<String>> selectedCustomizations = new HashMap<>();
 
-        while(!customizations.isEmpty()) {
-            System.out.println("Select a customization: ");
+        if (customizations.isEmpty()) {
+            System.out.println("No customizations available.");
+            return selectedCustomizations;
+        }
+
+        while (true) {
+            System.out.println("Select a customization:");
             List<String> customizationOptions = new ArrayList<>(customizations.keySet());
-            for(int i = 0; i < customizationOptions.size(); i++) {
+
+            for (int i = 0; i < customizationOptions.size(); i++) {
                 System.out.println("(" + (i + 1) + ") " + customizationOptions.get(i));
             }
             System.out.println("(" + (customizationOptions.size() + 1) + ") Done");
-            int choice = getValidInput(1, customizationOptions.size() + 1);
 
-            if (choice == customizationOptions.size() + 1) { break; }
+            int choice = getValidInput(1, customizationOptions.size() + 1);
+            if (choice == customizationOptions.size() + 1) {
+                break;
+            }
 
             String customization = customizationOptions.get(choice - 1);
             Map<String, Float> options = customizations.get(customization);
@@ -216,9 +226,16 @@ public class CashierMainMenu {
 
             int optionChoice = getValidInput(1, optionList.size());
             String selectedOption = optionList.get(optionChoice - 1) + ":" + options.get(optionList.get(optionChoice - 1));
-            selectedCustomizations.put(customization, selectedOption);
 
+            System.out.println("Enter quantity for " + selectedOption.split(":")[0] + ":");
+            int quantity = getValidQuantityInput();
 
+            selectedCustomizations.putIfAbsent(customization, new ArrayList<>());
+            for (int i = 0; i < quantity; i++) {
+                selectedCustomizations.get(customization).add(selectedOption);
+            }
+
+            System.out.println(quantity + " instance(s) of " + selectedOption.split(":")[0] + " added.");
         }
 
         return selectedCustomizations;
