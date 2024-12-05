@@ -64,17 +64,33 @@ public class PointOfSale {
             }
 
             String[] data = line.split("(?<!\\\\),");
+            if (data.length < 4) { // Check if there are enough elements
+                System.out.println("Skipping invalid line: " + line);
+                line = reader.readLine();
+                continue;
+            }
+
             String itemCode = data[0];
             String name = data[1].replace("\\,", ",");
             String itemType = data[2];
             String category = data[3].replace("\\,", ",");
+
             Map<String, Float> sizesAndPricesMap = new HashMap<>();
 
             line = reader.readLine();
+            if (line == null) {
+                System.out.println("Skipping line due to missing sizes and prices: " + line);
+                break; // Prevent further processing
+            }
+
             data = line.split("(?<!\\\\),");
 
             for (String datum : data) {
                 String[] data2 = datum.split(":");
+                if (data2.length != 2) { // Validate size:price format
+                    System.out.println("Skipping invalid size-price pair: " + datum);
+                    continue;
+                }
                 sizesAndPricesMap.put(data2[0], Float.parseFloat(data2[1]));
             }
 
@@ -85,10 +101,10 @@ public class PointOfSale {
                 case "Drink" -> Items.add(new Drink(itemCode, name, itemType, sizesAndPricesMap, category, customizations));
                 case "Food" -> Items.add(new Food(itemCode, name, itemType, sizesAndPricesMap, category, customizations));
                 case "Merchandise" -> Items.add(new Merchandise(itemCode, name, itemType, sizesAndPricesMap, category));
+                default -> System.out.println("Unknown item type: " + itemType);
             }
 
             line = reader.readLine();
-
         }
     }
 

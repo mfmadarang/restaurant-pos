@@ -270,11 +270,33 @@ public class ManagerMainMenu {
 
 
     private String generateItemCode(int itemTypeChoice, String category, String itemName) {
-        if (itemName.length() >= 3) {
-            return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.substring(0, 3).toUpperCase();
+        if (category == null || category.trim().isEmpty()) {
+            switch (itemTypeChoice) {
+                case 1 -> category = "GENERAL DRINK";
+                case 2 -> category = "GENERAL FOOD";
+                case 3 -> category = "GENERAL MERCHANDISE";
+            }
         } else {
-            return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.toUpperCase();
+            // Trim and remove any special characters or spaces
+            category = category.trim().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
         }
+
+        // Validate and clean item name input
+        if (itemName == null || itemName.trim().isEmpty()) {
+            itemName = "UNNAMED";
+        }
+
+        // Ensure item name is long enough for substring
+        String itemNameCode = itemName.length() >= 3 ?
+                itemName.substring(0, 3).replaceAll("[^a-zA-Z0-9]", "").toUpperCase() :
+                (itemName.replaceAll("[^a-zA-Z0-9]", "").toUpperCase() + "XXX").substring(0, 3);
+
+        // Truncate category if too long
+        assert category != null;
+        category = category.length() > 10 ? category.substring(0, 10) : category;
+
+        // Construct the item code
+        return String.format("%d-%s-%s", itemTypeChoice, category, itemNameCode);
     }
 
 
