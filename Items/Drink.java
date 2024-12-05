@@ -13,7 +13,8 @@ public class Drink extends ItemCharacteristics {
         this.customizations = customizations;
     }
 
-    public String getDrinkCategory() {
+    @Override
+    public String getCategory() {
         return drinkCategory;
     }
 

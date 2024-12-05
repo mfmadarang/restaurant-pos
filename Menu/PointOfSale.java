@@ -10,9 +10,9 @@ public class PointOfSale {
 
     public static void main(String[] args) {
         PointOfSale pos = new PointOfSale();
+        pos.fetchDataFromTextFile();
         pos.showMainMenu();
         pos.fetchDataFromTextFile();
-        //pos.showMainMenu();
 
     }
 
@@ -247,24 +247,30 @@ public class PointOfSale {
 
     // Main Menu for user role selection
     public void showMainMenu() {
-        System.out.println("Select User:");
-        System.out.println("(1) Cashier");
-        System.out.println("(2) Manager");
-        System.out.println("(3) Quit");
+        while(true) {
+            System.out.println("Select User:");
+            System.out.println("(1) Cashier");
+            System.out.println("(2) Manager");
+            System.out.println("(3) Quit");
 
-        int choice = getValidInput(1, 3);
+            int choice = getValidInput(1, 3);
 
-        switch (choice) {
-            case 1 -> {
-                CashierMainMenu cashierMainMenu = new CashierMainMenu();
-                cashierMainMenu.showCashierMenu(Items);
+            switch (choice) {
+                case 1 -> {
+                    CashierMainMenu cashierMainMenu = new CashierMainMenu();
+                    cashierMainMenu.showCashierMenu(Items);
+                }
+                case 2 -> {
+                    ManagerMainMenu managerMainMenu = new ManagerMainMenu(this);
+                    managerMainMenu.showManagerMenu();
+                }
+                case 3 -> {
+                    System.out.println("Exiting the system. Goodbye!");
+                    return;
+                }
             }
-            case 2 -> {
-                ManagerMainMenu managerMainMenu = new ManagerMainMenu(this);
-                managerMainMenu.showManagerMenu();
-            }
-            case 3 -> System.out.println("Exiting the system. Goodbye!");
         }
+
     }
 
     // Utility method for input validation

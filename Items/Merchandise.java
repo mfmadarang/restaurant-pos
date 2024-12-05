@@ -10,7 +10,8 @@ public class Merchandise extends ItemCharacteristics {
         this.merchandiseCategory = merchandiseCategory;
     }
 
-    public String getMerchandiseCategory() {
+    @Override
+    public String getCategory() {
         return merchandiseCategory;
     }
 

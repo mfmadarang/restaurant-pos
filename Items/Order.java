@@ -41,6 +41,10 @@ public class Order {
         return totalPrice;
     }
 
+    public void increasePrice(float price) {
+        this.totalPrice += price;
+    }
+
     /**
      * Generate a unique order key based on item name, size, and customizations.
      * This key will be used to check if the same item (with the same size and customizations) is ordered again.

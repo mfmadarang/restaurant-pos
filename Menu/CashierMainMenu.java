@@ -11,24 +11,29 @@ public class CashierMainMenu {
 
     public void showCashierMenu(ArrayList<ItemCharacteristics> Items) {
         // Create new transaction
-        System.out.println("Welcome, Cashier!");
-        System.out.println("Select option:");
-        System.out.println("(1) Place Order");
-        System.out.println("(2) Logout");
+        while (true) {
+            System.out.println("Welcome, Cashier!");
+            System.out.println("Select option:");
+            System.out.println("(1) Place Order");
+            System.out.println("(2) Logout");
 
-        int choice = getValidInput(1, 2);
+            int choice = getValidInput(1, 2);
 
-        switch (choice) {
-            case 1 -> startTransaction(Items);
-            case 2 -> System.out.println("Logging out...");
+            switch (choice) {
+                case 1 -> startTransaction(Items);
+                case 2 -> {
+                    System.out.println("Logging out...");
+                    return;
+                }
+            }
         }
+
     }
 
     private void startTransaction(ArrayList<ItemCharacteristics> Items) {
         boolean continueTransaction = true;  // Flag to control the continuation of the transaction
 
-        // Loop to continue the transaction until the user decides to stop
-        while (continueTransaction) {
+        while(true) {
             // Display current order summary
             if (!orderSummaryMap.isEmpty()) {
                 System.out.println("\n--- Current Order Summary ---");
@@ -48,7 +53,7 @@ public class CashierMainMenu {
             System.out.println("(4) Complete Transaction");
             System.out.println("(5) Cancel Transaction"); // least priority
 
-            int choice = getValidInput(1, 4);
+            int choice = getValidInput(1, 5);
 
             switch (choice) {
                 case 1 -> selectItemType(Items, "Drink");
@@ -62,27 +67,13 @@ public class CashierMainMenu {
                         transactionPrice += order.getTotalPrice();
                     }
                     System.out.println("Total Transaction Price: " + transactionPrice);
-                    System.out.println("Transaction complete.");
+                    System.out.println("Transaction complete.\n");
                     return;
                 }
                 case 5 -> {
-                    System.out.println("Transaction cancelled by user. Return to Cashier Main Menu");
+                    System.out.println("Transaction cancelled by user. Return to Cashier Main Menu\n");
                     orderSummaryMap.clear();
-                    showCashierMenu(Items);
-                }
-            }
-
-            // Ask the user if they want to continue adding more items to the order
-            if (continueTransaction) {
-                System.out.println("\nDo you want to add another item? (yes/no)");
-                String continueResponse = scanner.nextLine().trim().toLowerCase();
-                if (continueResponse.equals("no")) {
-                    continueTransaction = false;  // Exit the loop if the user says "no"
-                    System.out.println("\n--- Final Order Summary ---");
-                    for (String order : orderSummary) {
-                        System.out.println(order);
-                    }
-                    System.out.println("Transaction complete.");
+                    return;
                 }
             }
         }
@@ -111,6 +102,11 @@ public class CashierMainMenu {
 
         }
 
+        if (List.isEmpty()) {
+            System.out.println("This item type has no available items. Returning to Select Item Type");
+            return;
+        }
+
         List<String> uniqueCategoryList = new ArrayList<>(categorySet);
 
         System.out.println("Select " + itemType + " Category:");
@@ -135,7 +131,12 @@ public class CashierMainMenu {
     }
 
     private void showCategoryItems(ArrayList<ItemCharacteristics> categoryItems, String itemType, String category) {
-        System.out.println("Select a" + itemType + " from " + category +" category:");
+        if (categoryItems.isEmpty()) {
+            System.out.println("This " + category + " category has no available items. Returning to Select Item Type");
+            return;
+        }
+
+        System.out.println("Select a " + itemType + " from " + category +" category:");
         int index = 1;
         for (ItemCharacteristics item : categoryItems) {
             System.out.println("(" + index + ") " + item.getName());
@@ -148,10 +149,10 @@ public class CashierMainMenu {
         float basePrice = chosenItem.getSizesAndPrices().get(chosenSize);
 
         Map<String, String> selectedCustomizations = new HashMap<>();
-        if (chosenItem instanceof Drink drinkItem) {
-            selectedCustomizations = selectCustomizations(drinkItem.getCustomizations());
-        } else if (chosenItem instanceof Food foodItem) {
-            selectedCustomizations = selectCustomizations(foodItem.getCustomizations());
+        if (chosenItem instanceof Drink) {
+            selectedCustomizations = selectCustomizations(((Drink) chosenItem).getCustomizations());
+        } else if (chosenItem instanceof Food) {
+            selectedCustomizations = selectCustomizations(((Food) chosenItem).getCustomizations());
         }
 
         float totalPrice = basePrice;
@@ -167,6 +168,7 @@ public class CashierMainMenu {
         if (orderSummaryMap.containsKey(orderKey)) {
             Order order = orderSummaryMap.get(orderKey);
             order.increaseQuantity(quantity);
+            order.increasePrice(newOrder.getTotalPrice());
             System.out.println("Added to existing order.");
         }
         else {
