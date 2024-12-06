@@ -7,15 +7,12 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class ManagerMainMenu {
-    private Scanner scanner;
-    private PointOfSale pointOfSale;
+    private final Scanner scanner;
+    private final PointOfSale pointOfSale;
 
     public ManagerMainMenu(PointOfSale pointOfSale) {
         this.pointOfSale = pointOfSale;
         this.scanner = new Scanner(System.in);
-    }
-
-    public ManagerMainMenu(ArrayList<ItemCharacteristics> items, Map<String, Integer> drinksCategoryIndex, Map<String, Integer> foodCategoryIndex, Map<String, Integer> merchandiseCategoryIndex) {
     }
 
     public void showManagerMenu() {
@@ -36,7 +33,7 @@ public class ManagerMainMenu {
         Enter your choice (1-5):
         """);
 
-            int choice = getValidInput(1, 5);
+            int choice = getValidInput(5);
 
             switch (choice) {
                 case 1 -> addItem();
@@ -192,7 +189,7 @@ Select the type of item to add:
 Enter your choice (1-3):
 """);
 
-        int itemTypeChoice = getValidInput(1, 3);
+        int itemTypeChoice = getValidInput(3);
 
         System.out.println("""
 ===========================================
@@ -213,7 +210,7 @@ Would you like to add different sizes?
 ===========================================
 Enter your choice (1-2):
 """);
-        int sizeChoice = getValidInput(1, 2);
+        int sizeChoice = getValidInput(2);
 
         Map<String, Float> sizesAndPricesMap = addSizes(sizeChoice);
 
@@ -299,6 +296,7 @@ Item has been added to the inventory. The data has been saved.
         }
 
         // Trim and clean category
+        assert category != null;
         category = category.trim().toUpperCase();
 
         // Validate and clean item name input
@@ -311,7 +309,7 @@ Item has been added to the inventory. The data has been saved.
 
         // Get category code (first and last characters)
         String categoryCode = category.length() >= 2 ?
-                category.substring(0, 1) + category.substring(category.length() - 1) :
+                category.charAt(0) + category.substring(category.length() - 1) :
                 category + "X";
 
         // Get item name prefix (first 4 characters)
@@ -358,7 +356,7 @@ Item has been added to the inventory. The data has been saved.
     """);
 
         Map<String, Map<String, Float>> customizations = new HashMap<>();
-        int customizationChoice = getValidInput(1, 2);
+        int customizationChoice = getValidInput(2);
 
         while (customizationChoice == 1) {
             System.out.println("""
@@ -414,7 +412,7 @@ Item has been added to the inventory. The data has been saved.
         ===========================================
         Enter your choice (1-2):
         """);
-            customizationChoice = getValidInput(1, 2);
+            customizationChoice = getValidInput(2);
         }
 
         if (customizations.isEmpty()) {
@@ -479,7 +477,7 @@ Item has been added to the inventory. The data has been saved.
     Enter your choice (1-3):
     """, itemCode);
 
-        int modifyChoice = getValidInput(1, 3);
+        int modifyChoice = getValidInput(3);
 
         switch (modifyChoice) {
             case 1 -> {
@@ -534,7 +532,7 @@ Item has been added to the inventory. The data has been saved.
             System.out.println("(2) Remove Size");
             System.out.println("(3) Finish");
 
-            int choice = getValidInput(1, 3);
+            int choice = getValidInput(3);
 
             switch (choice) {
                 case 1 -> {
@@ -563,11 +561,11 @@ Item has been added to the inventory. The data has been saved.
 
     private void modifyCustomizations(ItemCharacteristics item) {
         // Determine which customization map to use based on item type
-        Map<String, Map<String, Float>> customizationsMap = null;
+        Map<String, Map<String, Float>> customizationsMap;
         if (item instanceof Drink) {
-            customizationsMap = (Map<String, Map<String, Float>>) ((Drink) item).getCustomizations();
+            customizationsMap = ((Drink) item).getCustomizations();
         } else if (item instanceof Food) {
-            customizationsMap = (Map<String, Map<String, Float>>) ((Food) item).getCustomizations();
+            customizationsMap = ((Food) item).getCustomizations();
         } else {
             System.out.println("Customizations are only available for Drinks and Food.");
             return;
@@ -593,7 +591,7 @@ Item has been added to the inventory. The data has been saved.
             System.out.println("(3) Modify Customization Options");
             System.out.println("(4) Finish");
 
-            int choice = getValidInput(1, 4);
+            int choice = getValidInput(4);
 
             switch (choice) {
                 case 1 -> {
@@ -648,7 +646,7 @@ Item has been added to the inventory. The data has been saved.
                             System.out.println("(2) Remove Option");
                             System.out.println("(3) Finish");
 
-                            int optionChoice = getValidInput(1, 3);
+                            int optionChoice = getValidInput(3);
 
                             switch (optionChoice) {
                                 case 1 -> {
@@ -669,7 +667,6 @@ Item has been added to the inventory. The data has been saved.
                                     }
                                 }
                                 case 3 -> {
-                                    break;
                                 }
                             }
 
@@ -759,7 +756,7 @@ Item has been added to the inventory. The data has been saved.
             System.out.println("Do you want to add another size?");
             System.out.println("(1) Yes");
             System.out.println("(2) No");
-            sizeChoice = getValidInput(1, 2);
+            sizeChoice = getValidInput(2);
         }
 
         // If no sizes added, add a default "NS" (No Size) option
@@ -775,17 +772,17 @@ Item has been added to the inventory. The data has been saved.
     }
 
     // Helper method for getting valid input between min and max values
-    private int getValidInput(int min, int max) {
+    private int getValidInput(int max) {
         int input;
         while (true) {
             try {
                 input = scanner.nextInt();
                 scanner.nextLine(); // consume newline
 
-                if (input >= min && input <= max) {
+                if (input >= 1 && input <= max) {
                     return input;
                 } else {
-                    System.out.println("Invalid input. Please enter a number between " + min + " and " + max + ".");
+                    System.out.println("Invalid input. Please enter a number between " + 1 + " and " + max + ".");
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid number.");

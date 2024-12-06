@@ -249,19 +249,19 @@ public class CashierMainMenu {
 
         if (customizations == null || customizations.isEmpty()) {
             System.out.println("""
-        ===========================================
-              NO CUSTOMIZATIONS AVAILABLE
-        ===========================================
-        """);
+    ===========================================
+          NO CUSTOMIZATIONS AVAILABLE
+    ===========================================
+    """);
             return selectedCustomizations;
         }
 
         while (true) {
             System.out.println("""
-        ===========================================
-              SELECT A CUSTOMIZATION
-        ===========================================
-        """);
+    ===========================================
+          SELECT A CUSTOMIZATION
+    ===========================================
+    """);
 
             List<String> customizationOptions = new ArrayList<>(customizations.keySet());
 
@@ -281,10 +281,10 @@ public class CashierMainMenu {
             Map<String, Float> options = customizations.get(customization);
 
             System.out.println("""
-        ===========================================
-              SELECT AN OPTION FOR""" + " " + customization + "\n" + """
-        ===========================================
-        """);
+    ===========================================
+          SELECT AN OPTION FOR""" + " " + customization + "\n" + """
+    ===========================================
+    """);
 
             // Display options for the selected customization
             List<String> optionList = new ArrayList<>(options.keySet());
@@ -294,7 +294,7 @@ public class CashierMainMenu {
 
             System.out.println("==========================================");
             int optionChoice = getValidInput(1, optionList.size());
-            String selectedOption = optionList.get(optionChoice - 1) + ":" + String.format("%.2f",options.get(optionList.get(optionChoice - 1)));
+            String selectedOption = optionList.get(optionChoice - 1) + ":" + String.format("%.2f", options.get(optionList.get(optionChoice - 1)));
 
             // Select quantity for a particular type of customization
             System.out.println("Enter quantity for " + selectedOption.split(":")[0] + ":");
