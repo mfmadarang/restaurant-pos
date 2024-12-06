@@ -5,14 +5,14 @@ import java.util.Map;
 
 public class Order {
     private String itemName;
-    private String size;
+    private String sizeAndPrice;
     private Map<String, List<String>> customizations; // Customization name to list of selected options with prices
     private int quantity;
     private float totalPrice;
 
-    public Order(String itemName, String size, Map<String, List<String>> customizations, int quantity, float totalPrice) {
+    public Order(String itemName, String sizeAndPrice, Map<String, List<String>> customizations, int quantity, float totalPrice) {
         this.itemName = itemName;
-        this.size = size;
+        this.sizeAndPrice = sizeAndPrice;
         this.customizations = customizations;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
@@ -22,8 +22,8 @@ public class Order {
         return itemName;
     }
 
-    public String getSize() {
-        return size;
+    public String getSizeAndPrice() {
+        return sizeAndPrice;
     }
 
     public Map<String, List<String>> getCustomizations() {
@@ -54,7 +54,7 @@ public class Order {
      */
     public String generateOrderKey() {
         StringBuilder keyBuilder = new StringBuilder();
-        keyBuilder.append(itemName).append("_").append(size);  // Base key with item name and size
+        keyBuilder.append(itemName).append("_").append(sizeAndPrice);  // Base key with item name and size
 
         // If there are customizations, add them to the key
         if (customizations != null && !customizations.isEmpty()) {
@@ -87,7 +87,7 @@ public class Order {
         }
 
         return "Item: " + itemName +
-                "\nSize: " + size +
+                "\nSize: " + sizeAndPrice +
                 "\nCustomizations: " + customizationsStr +
                 "\nQuantity: " + quantity +
                 "\nTotal Price: ₱" + String.format("%.2f", totalPrice) + "\n";

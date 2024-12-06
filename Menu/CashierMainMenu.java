@@ -1,12 +1,11 @@
 package Menu;
 
 import Items.*;
-
+import Exceptions.*;
 import java.util.*;
 
 public class CashierMainMenu {
     private final Scanner scanner = new Scanner(System.in);
-    private List<String> orderSummary = new ArrayList<>(); // not used
     private Map<String, Order> orderSummaryMap = new HashMap<>();
 
     public void showCashierMenu(ArrayList<ItemCharacteristics> items) {
@@ -133,7 +132,7 @@ public class CashierMainMenu {
         List<String> uniqueCategoryList = new ArrayList<>(categorySet);
         System.out.println("""
     ===========================================
-             SELECT CATEGORY FOR """ + itemType.toUpperCase() + """
+             SELECT CATEGORY FOR""" + " " + itemType.toUpperCase() + "\n" +"""
     ===========================================
     """);
 
@@ -188,6 +187,8 @@ public class CashierMainMenu {
         String chosenSize = selectSizes(chosenItem.getSizesAndPrices());
         float basePrice = chosenItem.getSizesAndPrices().get(chosenSize);
 
+        String chosenSizeAndPrice = chosenSize + " (₱" + String.format("%.2f", basePrice) + ")";
+
         Map<String, List<String>> selectedCustomizations = new HashMap<>();
         if (chosenItem instanceof Drink) {
             selectedCustomizations = selectCustomizations(((Drink) chosenItem).getCustomizations());
@@ -204,7 +205,7 @@ public class CashierMainMenu {
 
         int quantity = getValidQuantityInput();
 
-        Order newOrder = new Order(chosenItem.getName(), chosenSize, selectedCustomizations, quantity, (basePrice + customizationPrice) * quantity);
+        Order newOrder = new Order(chosenItem.getName(), chosenSizeAndPrice, selectedCustomizations, quantity, (basePrice + customizationPrice) * quantity);
         String orderKey = newOrder.generateOrderKey();
 
         if (orderSummaryMap.containsKey(orderKey)) {
@@ -246,7 +247,7 @@ public class CashierMainMenu {
     private Map<String, List<String>> selectCustomizations(Map<String, Map<String, Float>> customizations) {
         Map<String, List<String>> selectedCustomizations = new HashMap<>();
 
-        if (customizations.isEmpty()) {
+        if (customizations == null || customizations.isEmpty()) {
             System.out.println("""
         ===========================================
               NO CUSTOMIZATIONS AVAILABLE
@@ -281,7 +282,7 @@ public class CashierMainMenu {
 
             System.out.println("""
         ===========================================
-              SELECT AN OPTION FOR """ + customization + """
+              SELECT AN OPTION FOR""" + " " + customization + "\n" + """
         ===========================================
         """);
 
@@ -293,8 +294,9 @@ public class CashierMainMenu {
 
             System.out.println("==========================================");
             int optionChoice = getValidInput(1, optionList.size());
-            String selectedOption = optionList.get(optionChoice - 1) + ":" + options.get(optionList.get(optionChoice - 1));
+            String selectedOption = optionList.get(optionChoice - 1) + ":" + String.format("%.2f",options.get(optionList.get(optionChoice - 1)));
 
+            // Select quantity for a particular type of customization
             System.out.println("Enter quantity for " + selectedOption.split(":")[0] + ":");
             int quantity = getValidQuantityInput();
 
@@ -314,7 +316,7 @@ public class CashierMainMenu {
         int choice;
         while (true) {
             try {
-                System.out.println("Select choice: ");
+                System.out.print("Select choice: ");
                 choice = Integer.parseInt(scanner.nextLine());
                 if (choice >= min && choice <= max) {
                     return choice;
@@ -327,14 +329,24 @@ public class CashierMainMenu {
     }
 
     private int getValidQuantityInput() {
-        int choice;
+        int quantity;
+        String input;
         while (true) {
             try {
-                System.out.print("Select quantity: ");
-                choice = Integer.parseInt(scanner.nextLine());
-                return choice;
+                System.out.print("Input quantity: ");
+                input = scanner.nextLine();
+
+                quantity = Integer.parseInt(input);
+
+                if (quantity <= 0) {
+                    throw new InvalidQuantityInputException("Quantity must be a positive whole number.");
+                }
+
+                return quantity;
+            } catch (InvalidQuantityInputException e) {
+                System.out.println("Invalid input. " + e.getMessage() + "\n");
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.\n");
+                System.out.println("Invalid input. Please enter a positive whole number.\n");
             }
         }
     }
