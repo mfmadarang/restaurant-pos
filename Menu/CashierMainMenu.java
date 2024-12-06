@@ -339,11 +339,11 @@ public class CashierMainMenu {
                 quantity = Integer.parseInt(input);
 
                 if (quantity <= 0) {
-                    throw new InvalidQuantityInputException("Quantity must be a positive whole number.");
+                    throw new InvalidQuantityOrPriceInputException("Quantity must be a positive whole number.");
                 }
 
                 return quantity;
-            } catch (InvalidQuantityInputException e) {
+            } catch (InvalidQuantityOrPriceInputException e) {
                 System.out.println("Invalid input. " + e.getMessage() + "\n");
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a positive whole number.\n");

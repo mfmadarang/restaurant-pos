@@ -1,5 +1,6 @@
 package Menu;
 
+import Exceptions.InvalidQuantityOrPriceInputException;
 import Items.*;
 import java.util.*;
 import java.io.BufferedReader;
@@ -221,12 +222,22 @@ Enter your choice (1-2):
 Enter the category of the item:
 """);
         String category = scanner.nextLine();
+        // Default categories if not provided
+        if (category == null || category.trim().isEmpty()) {
+            switch (itemTypeChoice) {
+                case 1 -> category = "GENERAL DRINK";
+                case 2 -> category = "GENERAL FOOD";
+                case 3 -> category = "GENERAL MERCHANDISE";
+            }
+        }
+
 
         // Check for existing items before adding
+        String finalCategory = category;
         boolean itemExists = pointOfSale.Items.stream()
                 .anyMatch(existingItem ->
                         existingItem.getName().equalsIgnoreCase(itemName) &&
-                                existingItem.getCategory().equalsIgnoreCase(category)
+                                existingItem.getCategory().equalsIgnoreCase(finalCategory)
                 );
 
         if (itemExists) {
@@ -286,14 +297,7 @@ Item has been added to the inventory. The data has been saved.
 
 
     private String generateItemCode(int itemTypeChoice, String category, String itemName) {
-        // Default categories if not provided
-        if (category == null || category.trim().isEmpty()) {
-            switch (itemTypeChoice) {
-                case 1 -> category = "GENERAL DRINK";
-                case 2 -> category = "GENERAL FOOD";
-                case 3 -> category = "GENERAL MERCHANDISE";
-            }
-        }
+
 
         // Trim and clean category
         assert category != null;
@@ -344,7 +348,7 @@ Item has been added to the inventory. The data has been saved.
 
     private Map<String, Map<String, Float>> addCustomizations(int itemTypeChoice) {
         System.out.println("""
-    ===========================================
+    ==========================================
               ADD CUSTOMIZATIONS
     ===========================================
     Do you want to add customizations for this item?
@@ -363,9 +367,8 @@ Item has been added to the inventory. The data has been saved.
         ===========================================
                NEW CUSTOMIZATION
         ===========================================
-        Enter the name of the customization:
         """);
-            String customizationName = scanner.nextLine();
+            String customizationName = getValidCustomizationName();
 
             Map<String, Float> optionsAndPrices = new HashMap<>();
             int optionCount = 0;
@@ -380,11 +383,17 @@ Item has been added to the inventory. The data has been saved.
             """);
                 String optionName = scanner.nextLine();
 
+                if (optionName.trim().isEmpty() && optionCount == 0) {
+                    System.out.println("Invalid input. Please enter at least one customization option.");
+                    continue;
+                }
+
                 if (optionName.isEmpty()) break;
 
-                System.out.printf("Enter the price for '%s':%n", optionName);
-                float optionPrice = scanner.nextFloat();
-                scanner.nextLine(); // Consume newline
+                //System.out.printf("Enter the price for '%s':%n", optionName);
+                //float optionPrice = scanner.nextFloat();
+                //scanner.nextLine(); // Consume newline
+                float optionPrice = getValidPrice(optionName);
 
                 optionsAndPrices.put(optionName, optionPrice);
                 optionCount++;
@@ -538,9 +547,10 @@ Item has been added to the inventory. The data has been saved.
                 case 1 -> {
                     System.out.println("Enter Size Name:");
                     String sizeName = scanner.nextLine();
-                    System.out.println("Enter Price:");
-                    float price = scanner.nextFloat();
-                    scanner.nextLine(); // consume newline
+                    //System.out.println("Enter Price:");
+                    //float price = scanner.nextFloat();
+                    //scanner.nextLine(); // consume newline
+                    float price = getValidPrice(sizeName);
                     sizesAndPrices.put(sizeName, price);
                 }
                 case 2 -> {
@@ -605,9 +615,10 @@ Item has been added to the inventory. The data has been saved.
                         String optionName = scanner.nextLine();
                         if (optionName.isEmpty()) break;
 
-                        System.out.println("Enter Price for " + optionName + ":");
-                        float optionPrice = scanner.nextFloat();
-                        scanner.nextLine(); // consume newline
+                        //System.out.println("Enter Price for " + optionName + ":");
+                        //float optionPrice = scanner.nextFloat();
+                        //scanner.nextLine(); // consume newline
+                        float optionPrice = getValidPrice(optionName);
 
                         optionsAndPrices.put(optionName, optionPrice);
                         optionCount++;
@@ -652,9 +663,10 @@ Item has been added to the inventory. The data has been saved.
                                 case 1 -> {
                                     System.out.println("Enter Option Name:");
                                     String optionName = scanner.nextLine();
-                                    System.out.println("Enter Price:");
-                                    float optionPrice = scanner.nextFloat();
-                                    scanner.nextLine(); // consume newline
+                                    //System.out.println("Enter Price:");
+                                    //float optionPrice = scanner.nextFloat();
+                                    //scanner.nextLine(); // consume newline
+                                    float optionPrice = getValidPrice(optionName);
                                     options.put(optionName, optionPrice);
                                 }
                                 case 2 -> {
@@ -745,9 +757,10 @@ Item has been added to the inventory. The data has been saved.
                 break;
             }
 
-            System.out.println("Enter Price for " + sizeName + ":");
-            float sizePrice = scanner.nextFloat();
-            scanner.nextLine(); // consume newline
+            //System.out.println("Enter Price for " + sizeName + ":");
+            float sizePrice = getValidPrice(sizeName);
+            //float sizePrice = scanner.nextFloat();
+            //scanner.nextLine(); // consume newline
 
             // Add size and price to the map
             sizesAndPricesMap.put(sizeName, sizePrice);
@@ -769,6 +782,43 @@ Item has been added to the inventory. The data has been saved.
         }
 
         return sizesAndPricesMap;
+    }
+
+    private String getValidCustomizationName() {
+        while (true) {
+            System.out.println("Enter the name of the customization: ");
+            String customizationName = scanner.nextLine();
+            if (customizationName.trim().isEmpty()) {
+                System.out.println("Invalid customization name. Name cannot be blank.");
+            }
+            else {
+                return customizationName;
+            }
+        }
+
+    }
+
+    private float getValidPrice(String name) {
+        float quantity;
+        String input;
+        while (true) {
+            try {
+                System.out.printf("Enter the price for %s:%n", name);
+                input = scanner.nextLine();
+
+                quantity = Float.parseFloat(input);
+
+                if (quantity <= 0) {
+                    throw new InvalidQuantityOrPriceInputException("Price must be a positive number.");
+                }
+
+                return quantity;
+            } catch (InvalidQuantityOrPriceInputException e) {
+                System.out.println("Invalid input. " + e.getMessage() + "\n");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a positive number for the price.\n");
+            }
+        }
     }
 
     // Helper method for getting valid input between min and max values
