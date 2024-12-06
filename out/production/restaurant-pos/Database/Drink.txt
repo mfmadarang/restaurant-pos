@@ -1,3 +1,0 @@
-CS-STRA-001,Strawberry Shake,Drink,Cold Drinks
-NS:50.0
-
