@@ -1,2 +1,2 @@
-Espresso,1
-Cold Drinks,1
+GENERAL DRINK,2
+COLD DRINKS,1
