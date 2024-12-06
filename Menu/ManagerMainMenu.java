@@ -233,7 +233,7 @@ Enter the category of the item:
 
 
         // Check for existing items before adding
-        String finalCategory = category;
+        String finalCategory = category; // stream-based filter
         boolean itemExists = pointOfSale.Items.stream()
                 .anyMatch(existingItem ->
                         existingItem.getName().equalsIgnoreCase(itemName) &&

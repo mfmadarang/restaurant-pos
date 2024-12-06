@@ -78,8 +78,6 @@ public class Order {
                 // Group and count similar customizations
                 Map<String, Integer> customizationCounts = new HashMap<>();
                 for (String option : value) {
-                    String[] parts = option.split(":");
-                    String optionName = parts[0];
                     customizationCounts.merge(option, 1, Integer::sum);
                 }
 
@@ -92,11 +90,10 @@ public class Order {
                         customizationsStr.append(", ");
                     }
 
-                    if (entry.getValue() > 1) {
-                        customizationsStr.append(entry.getValue()).append(" ").append(parts[0]).append(" (₱").append(parts[1]).append(")");
-                    } else {
-                        customizationsStr.append(parts[0]).append(" (₱").append(parts[1]).append(")");
-                    }
+                    customizationsStr.append(entry.getValue() > 1 ?
+                                    entry.getValue() + " " + parts[0] :
+                                    "1 " + parts[0])
+                            .append(" (₱").append(parts[1]).append(")");
 
                     firstItem = false;
                 }
