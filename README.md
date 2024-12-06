@@ -59,6 +59,8 @@ The **Restaurant POS System** is designed to simplify restaurant management by h
 5. **Run the Application**  
    Navigate to the `src/Main/POSDriver.java` file and click **Run**.
 
+For a more in-depth step-by-step guide, access our [user manual](https://github.com/mfmadarang/restaurant-pos/blob/6b879e58e0bc56483ba1aa6aa2f8a095cc218b8e/docs/Hell-Week-Coffee-User-Manual.pdf)
+
 ---
 
 ## 🎮 Usage
