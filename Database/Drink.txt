@@ -1,0 +1,5 @@
+CS-MANG-001,Mango Shake,Drink,Cold Drinks
+Medium:65.0,Large:75.0
+Add Toppings_Kiwi:10.0,Strawberry:10.0
+Add Sugar_25% Sugar:10.0,50% Sugar:10.0
+

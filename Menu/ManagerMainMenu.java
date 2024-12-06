@@ -390,9 +390,6 @@ Item has been added to the inventory. The data has been saved.
 
                 if (optionName.isEmpty()) break;
 
-                //System.out.printf("Enter the price for '%s':%n", optionName);
-                //float optionPrice = scanner.nextFloat();
-                //scanner.nextLine(); // Consume newline
                 float optionPrice = getValidPrice(optionName);
 
                 optionsAndPrices.put(optionName, optionPrice);
@@ -547,9 +544,7 @@ Item has been added to the inventory. The data has been saved.
                 case 1 -> {
                     System.out.println("Enter Size Name:");
                     String sizeName = scanner.nextLine();
-                    //System.out.println("Enter Price:");
-                    //float price = scanner.nextFloat();
-                    //scanner.nextLine(); // consume newline
+
                     float price = getValidPrice(sizeName);
                     sizesAndPrices.put(sizeName, price);
                 }
@@ -615,9 +610,6 @@ Item has been added to the inventory. The data has been saved.
                         String optionName = scanner.nextLine();
                         if (optionName.isEmpty()) break;
 
-                        //System.out.println("Enter Price for " + optionName + ":");
-                        //float optionPrice = scanner.nextFloat();
-                        //scanner.nextLine(); // consume newline
                         float optionPrice = getValidPrice(optionName);
 
                         optionsAndPrices.put(optionName, optionPrice);
@@ -663,9 +655,7 @@ Item has been added to the inventory. The data has been saved.
                                 case 1 -> {
                                     System.out.println("Enter Option Name:");
                                     String optionName = scanner.nextLine();
-                                    //System.out.println("Enter Price:");
-                                    //float optionPrice = scanner.nextFloat();
-                                    //scanner.nextLine(); // consume newline
+
                                     float optionPrice = getValidPrice(optionName);
                                     options.put(optionName, optionPrice);
                                 }
@@ -757,10 +747,8 @@ Item has been added to the inventory. The data has been saved.
                 break;
             }
 
-            //System.out.println("Enter Price for " + sizeName + ":");
             float sizePrice = getValidPrice(sizeName);
-            //float sizePrice = scanner.nextFloat();
-            //scanner.nextLine(); // consume newline
+
 
             // Add size and price to the map
             sizesAndPricesMap.put(sizeName, sizePrice);
@@ -775,9 +763,8 @@ Item has been added to the inventory. The data has been saved.
         // If no sizes added, add a default "NS" (No Size) option
         if (sizesAndPricesMap.isEmpty()) {
             System.out.println("No sizes added. Adding default 'NS' (No Size).");
-            System.out.println("Enter Price for No Size:");
-            float defaultPrice = scanner.nextFloat();
-            scanner.nextLine(); // consume newline
+
+            float defaultPrice = getValidPrice("No Size");
             sizesAndPricesMap.put("NS", defaultPrice);
         }
 
