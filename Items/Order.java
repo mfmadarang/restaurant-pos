@@ -1,5 +1,6 @@
 package Items;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,13 +74,31 @@ public class Order {
         if (customizations != null && !customizations.isEmpty()) {
             customizations.forEach((key, value) -> {
                 customizationsStr.append("\n    - ").append(key).append(": ");
+
+                // Group and count similar customizations
+                Map<String, Integer> customizationCounts = new HashMap<>();
                 for (String option : value) {
                     String[] parts = option.split(":");
-                    customizationsStr.append(parts[0]).append(" (₱").append(parts[1]).append("), ");
+                    String optionName = parts[0];
+                    customizationCounts.merge(option, 1, Integer::sum);
                 }
-                // Remove trailing comma and space
-                if (customizationsStr.length() > 2) {
-                    customizationsStr.setLength(customizationsStr.length() - 2);
+
+                // Display grouped customizations
+                boolean firstItem = true;
+                for (Map.Entry<String, Integer> entry : customizationCounts.entrySet()) {
+                    String[] parts = entry.getKey().split(":");
+
+                    if (!firstItem) {
+                        customizationsStr.append(", ");
+                    }
+
+                    if (entry.getValue() > 1) {
+                        customizationsStr.append(entry.getValue()).append(" ").append(parts[0]).append(" (₱").append(parts[1]).append(")");
+                    } else {
+                        customizationsStr.append(parts[0]).append(" (₱").append(parts[1]).append(")");
+                    }
+
+                    firstItem = false;
                 }
             });
         } else {
