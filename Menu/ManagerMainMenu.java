@@ -289,36 +289,60 @@ Item has been added to the inventory. The data has been saved.
 
 
     private String generateItemCode(int itemTypeChoice, String category, String itemName) {
+        // Default categories if not provided
         if (category == null || category.trim().isEmpty()) {
             switch (itemTypeChoice) {
                 case 1 -> category = "GENERAL DRINK";
                 case 2 -> category = "GENERAL FOOD";
                 case 3 -> category = "GENERAL MERCHANDISE";
             }
-        } else {
-            // Trim and remove any special characters or spaces
-            category = category.trim().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
         }
+
+        // Trim and clean category
+        category = category.trim().toUpperCase();
 
         // Validate and clean item name input
         if (itemName == null || itemName.trim().isEmpty()) {
             itemName = "UNNAMED";
         }
 
-        // Ensure item name is long enough for substring
-        String itemNameCode = itemName.length() >= 3 ?
-                itemName.substring(0, 3).replaceAll("[^a-zA-Z0-9]", "").toUpperCase() :
-                (itemName.replaceAll("[^a-zA-Z0-9]", "").toUpperCase() + "XXX").substring(0, 3);
+        // Clean item name
+        itemName = itemName.trim().toUpperCase();
 
-        // Truncate category if too long
-        assert category != null;
-        category = category.length() > 10 ? category.substring(0, 10) : category;
+        // Get category code (first and last characters)
+        String categoryCode = category.length() >= 2 ?
+                category.substring(0, 1) + category.substring(category.length() - 1) :
+                category + "X";
+
+        // Get item name prefix (first 4 characters)
+        String itemNamePrefix = itemName.length() >= 4 ?
+                itemName.substring(0, 4) :
+                (itemName + "XXXX").substring(0, 4);
+
+        // Determine the auto-incrementing number based on category
+        int incrementingNumber;
+        switch (itemTypeChoice) {
+            case 1 -> { // Drink
+                incrementingNumber = pointOfSale.drinksCategoryIndex.getOrDefault(category, 0) + 1;
+                pointOfSale.drinksCategoryIndex.put(category, incrementingNumber);
+            }
+            case 2 -> { // Food
+                incrementingNumber = pointOfSale.foodCategoryIndex.getOrDefault(category, 0) + 1;
+                pointOfSale.foodCategoryIndex.put(category, incrementingNumber);
+            }
+            case 3 -> { // Merchandise
+                incrementingNumber = pointOfSale.merchandiseCategoryIndex.getOrDefault(category, 0) + 1;
+                pointOfSale.merchandiseCategoryIndex.put(category, incrementingNumber);
+            }
+            default -> incrementingNumber = 1;
+        }
+
+        // Format the incrementing number to always be 3 digits
+        String formattedNumber = String.format("%03d", incrementingNumber);
 
         // Construct the item code
-        return String.format("%d-%s-%s", itemTypeChoice, category, itemNameCode);
+        return String.format("%s-%s-%s", categoryCode, itemNamePrefix, formattedNumber);
     }
-
-
 
     private Map<String, Map<String, Float>> addCustomizations(int itemTypeChoice) {
         System.out.println("""
