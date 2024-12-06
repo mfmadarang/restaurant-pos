@@ -1,0 +1,4 @@
+SS-CHIC-001,Chicken Sandwich,Food,Sandwiches
+Medium:60.0,Jumbo:80.0
+Add extra fillings_Tuna Flakes:15.0,Scrambled Egg:15.0
+

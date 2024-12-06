@@ -2,6 +2,8 @@ package Menu;
 
 import Exceptions.InvalidQuantityOrPriceInputException;
 import Items.*;
+import org.w3c.dom.ls.LSOutput;
+
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -196,9 +198,8 @@ Enter your choice (1-3):
 ===========================================
             ITEM DETAILS
 ===========================================
-Enter the name of the item:
 """);
-        String itemName = scanner.nextLine();
+        String itemName = getValidItemName();
 
         System.out.println("""
 ===========================================
@@ -219,9 +220,8 @@ Enter your choice (1-2):
 ===========================================
             CATEGORY DETAILS
 ===========================================
-Enter the category of the item:
 """);
-        String category = scanner.nextLine();
+        String category = getValidCategoryName();
         // Default categories if not provided
         if (category == null || category.trim().isEmpty()) {
             switch (itemTypeChoice) {
@@ -387,6 +387,10 @@ Item has been added to the inventory. The data has been saved.
                     System.out.println("Invalid input. Please enter at least one customization option.");
                     continue;
                 }
+                else if (optionName.contains("\\")) {
+                    System.out.println("Invalid input. \\ are not allowed");
+                    continue;
+                }
 
                 if (optionName.isEmpty()) break;
 
@@ -542,11 +546,24 @@ Item has been added to the inventory. The data has been saved.
 
             switch (choice) {
                 case 1 -> {
-                    System.out.println("Enter Size Name:");
-                    String sizeName = scanner.nextLine();
+                    while (true) {
+                        System.out.println("Enter Size Name:");
+                        String sizeName = scanner.nextLine();
 
-                    float price = getValidPrice(sizeName);
-                    sizesAndPrices.put(sizeName, price);
+                        if (sizeName.isEmpty()) {
+                            System.out.println("Invalid input. Size name cannot be blank.");
+                            continue;
+                        }
+                        if (sizeName.contains("\\")) {
+                            System.out.println("Invalid input. Name cannot contain '\\'");
+                            continue;
+                        }
+
+                        float price = getValidPrice(sizeName);
+                        sizesAndPrices.put(sizeName, price);
+                        break;
+                    }
+
                 }
                 case 2 -> {
                     System.out.println("Enter Size Name to Remove:");
@@ -600,15 +617,27 @@ Item has been added to the inventory. The data has been saved.
 
             switch (choice) {
                 case 1 -> {
-                    System.out.println("Enter Customization Name:");
-                    String customizationName = scanner.nextLine();
+
+                    String customizationName = getValidCustomizationName();
                     Map<String, Float> optionsAndPrices = new HashMap<>();
 
                     int optionCount = 0;
                     while (optionCount < 5) {
                         System.out.println("Enter Customization Option (or press Enter to finish):");
                         String optionName = scanner.nextLine();
-                        if (optionName.isEmpty()) break;
+                        //if (optionName.isEmpty()) break;
+
+                        if (optionName.trim().isEmpty() && optionCount == 0) {
+                            System.out.println("Invalid input. Please enter at least one customization option.");
+                            continue;
+                        }
+                        else if (optionName.contains("\\")) {
+                            System.out.println("Invalid input. \\ are not allowed");
+                            continue;
+                        }
+                        else if (optionName.isEmpty()) {
+                            break;
+                        }
 
                         float optionPrice = getValidPrice(optionName);
 
@@ -655,6 +684,15 @@ Item has been added to the inventory. The data has been saved.
                                 case 1 -> {
                                     System.out.println("Enter Option Name:");
                                     String optionName = scanner.nextLine();
+
+                                    if (optionName.trim().isEmpty()) {
+                                        System.out.println("Invalid input. Please enter at least one customization option.");
+                                        continue;
+                                    }
+                                    else if (optionName.contains("\\")) {
+                                        System.out.println("Invalid input. \\ are not allowed");
+                                        continue;
+                                    }
 
                                     float optionPrice = getValidPrice(optionName);
                                     options.put(optionName, optionPrice);
@@ -746,6 +784,10 @@ Item has been added to the inventory. The data has been saved.
             if (sizeName.isEmpty()) {
                 break;
             }
+            if (sizeName.contains("\\")) {
+                System.out.println("Invalid input. Name cannot contain '\\'");
+                continue;
+            }
 
             float sizePrice = getValidPrice(sizeName);
 
@@ -771,12 +813,45 @@ Item has been added to the inventory. The data has been saved.
         return sizesAndPricesMap;
     }
 
+    private String getValidCategoryName() {
+        while(true) {
+            System.out.println("Enter the category name of the item: ");
+            String categoryName = scanner.nextLine();
+            if (categoryName.contains("\\")) {
+                System.out.println("Invalid category name. Name cannot contain '\\'");
+            }
+            else {
+                return categoryName;
+            }
+        }
+    }
+
+    private String getValidItemName() {
+        while (true) {
+            System.out.println("Enter the name of the item: ");
+            String itemName = scanner.nextLine();
+            if (itemName.trim().isEmpty()) {
+                System.out.println("Invalid item name. Name cannot be blank.");
+            }
+            else if (itemName.contains("\\")) {
+                System.out.println("Invalid item name. Name cannot contain '\\'.");
+            }
+            else {
+                return itemName;
+            }
+        }
+
+    }
+
     private String getValidCustomizationName() {
         while (true) {
             System.out.println("Enter the name of the customization: ");
             String customizationName = scanner.nextLine();
             if (customizationName.trim().isEmpty()) {
                 System.out.println("Invalid customization name. Name cannot be blank.");
+            }
+            else if (customizationName.contains("\\")) {
+                System.out.println("Invalid customization name. Name cannot contain '\\'.");
             }
             else {
                 return customizationName;
