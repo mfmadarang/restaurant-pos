@@ -180,50 +180,69 @@ public class ManagerMainMenu {
 
     public void addItem() {
         System.out.println("""
-    ===========================================
-                    ADD NEW ITEM
-    ===========================================
-    Select the type of item to add:
-    
-    (1) Drinks        - Add a drink to the inventory
-    (2) Food          - Add a food item to the inventory
-    (3) Merchandise   - Add merchandise to the inventory
-    ===========================================
-    Enter your choice (1-3):
-    """);
+===========================================
+                ADD NEW ITEM
+===========================================
+Select the type of item to add:
+
+(1) Drinks        - Add a drink to the inventory
+(2) Food          - Add a food item to the inventory
+(3) Merchandise   - Add merchandise to the inventory
+===========================================
+Enter your choice (1-3):
+""");
 
         int itemTypeChoice = getValidInput(1, 3);
 
         System.out.println("""
-    ===========================================
-                ITEM DETAILS
-    ===========================================
-    Enter the name of the item:
-    """);
+===========================================
+            ITEM DETAILS
+===========================================
+Enter the name of the item:
+""");
         String itemName = scanner.nextLine();
 
         System.out.println("""
-    ===========================================
-               SIZE OPTIONS
-    ===========================================
-    Would you like to add different sizes?
+===========================================
+           SIZE OPTIONS
+===========================================
+Would you like to add different sizes?
 
-    (1) Yes
-    (2) No
-    ===========================================
-    Enter your choice (1-2):
-    """);
+(1) Yes
+(2) No
+===========================================
+Enter your choice (1-2):
+""");
         int sizeChoice = getValidInput(1, 2);
 
         Map<String, Float> sizesAndPricesMap = addSizes(sizeChoice);
 
         System.out.println("""
-    ===========================================
-                CATEGORY DETAILS
-    ===========================================
-    Enter the category of the item:
-    """);
+===========================================
+            CATEGORY DETAILS
+===========================================
+Enter the category of the item:
+""");
         String category = scanner.nextLine();
+
+        // Check for existing items before adding
+        boolean itemExists = pointOfSale.Items.stream()
+                .anyMatch(existingItem ->
+                        existingItem.getName().equalsIgnoreCase(itemName) &&
+                                existingItem.getCategory().equalsIgnoreCase(category)
+                );
+
+        if (itemExists) {
+            System.out.println("""
+===========================================
+          ITEM ALREADY EXISTS
+===========================================
+An item with the same name and category already exists.
+Please choose a different name or category.
+===========================================
+""");
+            return; // Exit the method without adding the item
+        }
 
         String itemCode = generateItemCode(itemTypeChoice, category, itemName);
 
@@ -233,10 +252,10 @@ public class ManagerMainMenu {
         }
 
         System.out.println("""
-    ===========================================
-                ADDING ITEM
-    ===========================================
-    """);
+===========================================
+            ADDING ITEM
+===========================================
+""");
 
         switch (itemTypeChoice) {
             case 1 -> {
@@ -257,12 +276,12 @@ public class ManagerMainMenu {
         }
 
         System.out.println("""
-    ===========================================
-            ITEM SUCCESSFULLY ADDED
-    ===========================================
-    Item has been added to the inventory. The data has been saved.
-    ===========================================
-    """);
+===========================================
+        ITEM SUCCESSFULLY ADDED
+===========================================
+Item has been added to the inventory. The data has been saved.
+===========================================
+""");
 
         // Store updated data
         pointOfSale.storeDataToTextFile();
@@ -270,7 +289,33 @@ public class ManagerMainMenu {
 
 
     private String generateItemCode(int itemTypeChoice, String category, String itemName) {
-        return itemTypeChoice + "-" + category.toUpperCase() + "-" + itemName.substring(0, 3).toUpperCase();
+        if (category == null || category.trim().isEmpty()) {
+            switch (itemTypeChoice) {
+                case 1 -> category = "GENERAL DRINK";
+                case 2 -> category = "GENERAL FOOD";
+                case 3 -> category = "GENERAL MERCHANDISE";
+            }
+        } else {
+            // Trim and remove any special characters or spaces
+            category = category.trim().replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+        }
+
+        // Validate and clean item name input
+        if (itemName == null || itemName.trim().isEmpty()) {
+            itemName = "UNNAMED";
+        }
+
+        // Ensure item name is long enough for substring
+        String itemNameCode = itemName.length() >= 3 ?
+                itemName.substring(0, 3).replaceAll("[^a-zA-Z0-9]", "").toUpperCase() :
+                (itemName.replaceAll("[^a-zA-Z0-9]", "").toUpperCase() + "XXX").substring(0, 3);
+
+        // Truncate category if too long
+        assert category != null;
+        category = category.length() > 10 ? category.substring(0, 10) : category;
+
+        // Construct the item code
+        return String.format("%d-%s-%s", itemTypeChoice, category, itemNameCode);
     }
 
 

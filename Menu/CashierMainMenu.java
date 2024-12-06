@@ -55,7 +55,7 @@ public class CashierMainMenu {
                     System.out.println(order);
                     currentTransactionPrice += order.getTotalPrice();
                 }
-                System.out.printf("\nCurrent Transaction Price: $%.2f%n", currentTransactionPrice);
+                System.out.printf("\nCurrent Transaction Price: ₱%.2f%n", currentTransactionPrice);
                 System.out.println("==========================================\n");
             }
 
@@ -87,7 +87,7 @@ public class CashierMainMenu {
                         System.out.println(order);
                         transactionPrice += order.getTotalPrice();
                     }
-                    System.out.printf("\nTotal Transaction Price: $%.2f%n", transactionPrice);
+                    System.out.printf("\nTotal Transaction Price: ₱%.2f%n", transactionPrice);
                     System.out.println("\nTransaction complete.\n");
                     return;
                 }
@@ -229,7 +229,7 @@ public class CashierMainMenu {
 
         // Display size options in a formatted list
         for (int i = 0; i < sizeOptions.size(); i++) {
-            System.out.printf("(%d) %-10s - $%.2f%n", (i + 1), sizeOptions.get(i), sizesAndPrices.get(sizeOptions.get(i)));
+            System.out.printf("(%d) %-10s - ₱%.2f%n", (i + 1), sizeOptions.get(i), sizesAndPrices.get(sizeOptions.get(i)));
         }
 
         // Display the valid range for size input
@@ -288,7 +288,7 @@ public class CashierMainMenu {
             // Display options for the selected customization
             List<String> optionList = new ArrayList<>(options.keySet());
             for (int i = 0; i < optionList.size(); i++) {
-                System.out.printf("(%d) %-20s : $%.2f%n", (i + 1), optionList.get(i), options.get(optionList.get(i)));
+                System.out.printf("(%d) %-20s : ₱%.2f%n", (i + 1), optionList.get(i), options.get(optionList.get(i)));
             }
 
             System.out.println("==========================================");
