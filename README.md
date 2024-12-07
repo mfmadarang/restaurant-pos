@@ -3,8 +3,7 @@
 > **Effortlessly manage your restaurant's operations with this user-friendly Point of Sale (POS) system.**
 
 ![Java](https://img.shields.io/badge/Java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white)
-![License](https://img.shields.io/badge/License-Open%20Source-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Development-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-blue?style=for-the-badge)
 
 ---
 
